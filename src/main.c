@@ -7,13 +7,15 @@
 #include <signal.h>
 #include <time.h>
 
+#include "rembrandt.c"
+
 // Global Variables /////////////////////////////////////////////////////////////////////
 
-int ULPY = 0, ULPX = 0, score = 0, nextBlock = 0, currentBlock = 0, blockState = 0;
-int board[20][10] = {0};
-int block[4][4] = {0};
-int level = 9;
-int pauseIn = 0;
+int ANCHOR_Y = 0, ANCHOR_X = 0, USER_SCORE = 0, NEXT_ID = 0, CURRENT_ID = 0, BLOCK_ROTATION = 0;
+int GAMEBOARD[20][10] = {0};
+int BLOCK_ARRAY[4][4] = {0};
+int USER_LEVEL = 9;
+int PAUSE = 0;
 
 // Methods //////////////////////////////////////////////////////////////////////////////
 
@@ -21,26 +23,26 @@ void sighandler(int);
 
 void DEBUG() {
 	move(0, 15);
-	printw("x: %d", ULPX);
+	printw("x: %d", ANCHOR_X);
 	move(3, 15);
-	printw("y: %d ", ULPY);
+	printw("y: %d ", ANCHOR_Y);
 	
 	move(5, 15);
-	printw("Score:%08d", score);
+	printw("USER_SCORE:%08d", USER_SCORE);
 	
 	move(0,30);
 	printw("block state in memory:");
 	for (int i = 0; i < 4; i++) {
 		move(i,30);
 		for (int j = 0; j < 4; j++)
-			printw("%d", block[i][j]);
+			printw("%d", BLOCK_ARRAY[i][j]);
 	}
 	
 	
 	for (int i = 0; i < 20; i++) {
 		move(i, 50);
 		for (int j = 0; j < 10; j++) {
-			printw("%d", board[i][j]);
+			printw("%d", GAMEBOARD[i][j]);
 		}
 	}
 }
@@ -48,16 +50,16 @@ void DEBUG() {
 
 // Generate new tetromino
 
-void generateBlock() {
-	nextBlock = rand() % 7;
+void BLOCK_GENERATE() {
+	NEXT_ID = rand() % 7;
 	move(0,0);
-	printw("%d", nextBlock);
+	printw("%d", NEXT_ID);
 	
 	move(8, 15);
 	printw("Next block:");
 	move(9,15);
 	
-	switch(nextBlock) {
+	switch(NEXT_ID) {
 			case 0:	// T
 			printw("XXX ");
 			move(10,15);
@@ -107,81 +109,81 @@ void generateBlock() {
 
 // Set tetromino in play /////////////////////////////////////////////////////////////
 
-void activeBlock() {
-	currentBlock = nextBlock;
-	blockState = 0;
+void BLOCK_PULL() {
+	CURRENT_ID = NEXT_ID;
+	BLOCK_ROTATION = 0;
 	
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
-			block[i][j] = 0;
+			BLOCK_ARRAY[i][j] = 0;
 		}
 	}
 	
-	switch(nextBlock) {
+	switch(NEXT_ID) {
 			case 0:	// T
-			block[0][0] = 1;
-			block[0][1] = 1;
-			block[0][2] = 1;
-			block[1][1] = 1;
+			BLOCK_ARRAY[0][0] = 1;
+			BLOCK_ARRAY[0][1] = 1;
+			BLOCK_ARRAY[0][2] = 1;
+			BLOCK_ARRAY[1][1] = 1;
 			break;
 			
 			case 1:	// I
-			block[0][0] = 1;
-			block[0][1] = 1;
-			block[0][2] = 1;
-			block[0][3] = 1;
+			BLOCK_ARRAY[0][0] = 1;
+			BLOCK_ARRAY[0][1] = 1;
+			BLOCK_ARRAY[0][2] = 1;
+			BLOCK_ARRAY[0][3] = 1;
 			break;
 			
 			case 2: // O
-			block[0][0] = 1;
-			block[0][1] = 1;
-			block[1][0] = 1;
-			block[1][1] = 1;
+			BLOCK_ARRAY[0][0] = 1;
+			BLOCK_ARRAY[0][1] = 1;
+			BLOCK_ARRAY[1][0] = 1;
+			BLOCK_ARRAY[1][1] = 1;
 			break;
 			
 			case 3:  // J
-			block[0][0] = 1;
-			block[0][1] = 1;
-			block[0][2] = 1;
-			block[1][2] = 1;
+			BLOCK_ARRAY[0][0] = 1;
+			BLOCK_ARRAY[0][1] = 1;
+			BLOCK_ARRAY[0][2] = 1;
+			BLOCK_ARRAY[1][2] = 1;
 			break;
 			
 			case 4: // L
-			block[0][0] = 1;
-			block[0][1] = 1;
-			block[0][2] = 1;
-			block[1][0] = 1;
+			BLOCK_ARRAY[0][0] = 1;
+			BLOCK_ARRAY[0][1] = 1;
+			BLOCK_ARRAY[0][2] = 1;
+			BLOCK_ARRAY[1][0] = 1;
 			break;
 			
 			case 5: // S
-			block[0][1] = 1;
-			block[0][2] = 1;
-			block[1][0] = 1;
-			block[1][1] = 1;
+			BLOCK_ARRAY[0][1] = 1;
+			BLOCK_ARRAY[0][2] = 1;
+			BLOCK_ARRAY[1][0] = 1;
+			BLOCK_ARRAY[1][1] = 1;
 			break;
 			
 			case 6: // Z
-			block[0][0] = 1;
-			block[0][1] = 1;
-			block[1][1] = 1;
-			block[1][2] = 1;
+			BLOCK_ARRAY[0][0] = 1;
+			BLOCK_ARRAY[0][1] = 1;
+			BLOCK_ARRAY[1][1] = 1;
+			BLOCK_ARRAY[1][2] = 1;
 			break;
 			
 			default: break;
 	}
 	
-	generateBlock();
+	BLOCK_GENERATE();
 }
 
 
 // draw active block. parameter x: 0=erase, 1=draw
 
-void drawBlock(int x) {
-	move(ULPY, ULPX);
+void BLOCK_DRAW(int x) {
+	move(ANCHOR_Y, ANCHOR_X);
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
-			if (block[i][j] == 1) {
-				move(ULPY+i,ULPX+j);
+			if (BLOCK_ARRAY[i][j] == 1) {
+				move(ANCHOR_Y+i,ANCHOR_X+j);
 				if (x)
 					printw("#");
 				else
@@ -189,53 +191,53 @@ void drawBlock(int x) {
 			}
 		}
 	}
-	move(ULPY, ULPX);
+	move(ANCHOR_Y, ANCHOR_X);
 }
 
 
-// rotate block both in theory and on game board
-void rotateBlock() {
+// rotate block both in theory and on game GAMEBOARD[
+void BLOCK_ROTATE() {
 
-	if (currentBlock != 2) {
+	if (CURRENT_ID != 2) {
 	
-	    	blockState++;
+	    	BLOCK_ROTATION++;
     		
     		// matrix inversion algorithm
 		for (int x = 0; x < (4 / 2); x++) {
 			for (int y = x; y < (4 - x - 1); y++) {
-				int temp = block[x][y];
+				int temp = BLOCK_ARRAY[x][y];
 				// Move values from right to top
-				block[x][y] = block[y][4 - 1 - x];
+				BLOCK_ARRAY[x][y] = BLOCK_ARRAY[y][4 - 1 - x];
 				// Move values from bottom to right
-				block[y][4 - 1 - x] = block[4 - 1 - x][4 - 1 - y];
+				BLOCK_ARRAY[y][4 - 1 - x] = BLOCK_ARRAY[4 - 1 - x][4 - 1 - y];
 				// Move values from left to bottom
-				block[4 - 1 - x][4 - 1 - y] = block[4 - 1 - y][x];
+				BLOCK_ARRAY[4 - 1 - x][4 - 1 - y] = BLOCK_ARRAY[4 - 1 - y][x];
 				// Assign temp to left
-				block[4 - 1 - y][x] = temp;
+				BLOCK_ARRAY[4 - 1 - y][x] = temp;
         		}
     		}
 		
     	// these next lines correct the positioning of the matrix depending on the block,
     	// so that all blocks and their orientations are anchored to the top-left corner
     	// of the active-block matrix
-    		if (currentBlock != 1) {
-    			for (int i = (1 + (blockState-1) % 2); i < 4; i++) {
+    		if (CURRENT_ID != 1) {
+    			for (int i = (1 + (BLOCK_ROTATION-1) % 2); i < 4; i++) {
 				for (int j = 0; j < 4; j++) {
-					block[i-( 1 + ((blockState-1) % 2))][j] = block[i][j];
-					block[i][j] = 0;
+					BLOCK_ARRAY[i-( 1 + ((BLOCK_ROTATION-1) % 2))][j] = BLOCK_ARRAY[i][j];
+					BLOCK_ARRAY[i][j] = 0;
 				}
 			}
-			if (blockState == 4) blockState = 0;
+			if (BLOCK_ROTATION == 4) BLOCK_ROTATION = 0;
 		}
 		
 		// below switches the I's second state back to first.
 		else {
-			if (blockState == 2) {
+			if (BLOCK_ROTATION == 2) {
 				for (int j = 0; j < 4; j++) {
-					block[0][j] = block[3][j];
-					block[3][j] = 0;
+					BLOCK_ARRAY[0][j] = BLOCK_ARRAY[3][j];
+					BLOCK_ARRAY[3][j] = 0;
 				}
-				blockState = 0;
+				BLOCK_ROTATION = 0;
 			}
 		}
     	}
@@ -243,7 +245,7 @@ void rotateBlock() {
 
 // Check collisions. Return 0 if no, 1 if yes
 
-int checkCollision(int choice) {	
+int CHECK_COLLISION(int choice) {	
 	int result = 1;
 	int modX, modY, n;
 	
@@ -266,9 +268,9 @@ int checkCollision(int choice) {
 	
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
-			if (block[i][j]) {
-				if ((ULPX+j+modX != 10) && (ULPX+j+modX != -1) && (ULPY+i+modY != 20)) {
-					n = block[i][j] + board[ULPY+i+modY][ULPX+j+modX];
+			if (BLOCK_ARRAY[i][j]) {
+				if ((ANCHOR_X+j+modX != 10) && (ANCHOR_X+j+modX != -1) && (ANCHOR_Y+i+modY != 20)) {
+					n = BLOCK_ARRAY[i][j] + GAMEBOARD[ANCHOR_Y+i+modY][ANCHOR_X+j+modX];
 					result = result && (n != 2);
 				}
 				
@@ -286,17 +288,17 @@ int checkCollision(int choice) {
 
 // Check for full line /////////////////////////////////////////////////////////////
 
-void checkLine(int line) {
+void CHECKLINE(int line) {
 	int compare = 1;
 	
 	// if row full, compare will exit as 1.
 	for (int j = 0; j < 10; j++) {
-		compare = compare && board[line][j];
+		compare = compare && GAMEBOARD[line][j];
 	}
 	
 	if (compare) { //if row full, compare = 1 or TRUE
 		
-		pauseIn = 1;
+		PAUSE = 1;
 		
 		ualarm(0,1000000);
 		mvprintw(line,0,"----------"); refresh(); usleep(62500);
@@ -309,31 +311,31 @@ void checkLine(int line) {
 			move(i,0);
 			for (int j = 0; j < 10; j++) {
 				
-				board[i][j] = board[i-1][j];
+				GAMEBOARD[i][j] = GAMEBOARD[i-1][j];
 				
-				if (board[i][j])
+				if (GAMEBOARD[i][j])
 					printw("#");
 				else
 					printw(" ");
 			}
 		}
 		
-		score += 100;
+		USER_SCORE += 100;
 		
-		if (!(score % 1000)) level--;
+		if (!(USER_SCORE % 1000)) USER_LEVEL--;
 		
-		pauseIn = 0;
+		PAUSE = 0;
 	}
 }
 
-// Write block to game board
+// Write block to game GAMEBOARD[
 
-void writeBlock() {
+void BLOCK_WRITE() {
 	for (int i = 0; i < 4; i++) {
 		for (int j = 0; j < 4; j++) {
-			if (block[i][j]) {
-				board[ULPY+i][ULPX+j] = 1;
-				checkLine(ULPY+i);
+			if (BLOCK_ARRAY[i][j]) {
+				GAMEBOARD[ANCHOR_Y+i][ANCHOR_X+j] = 1;
+				CHECKLINE(ANCHOR_Y+i);
 			}
 		}
 	}
@@ -341,54 +343,64 @@ void writeBlock() {
 
 // Game loop /////////////////////////////////////////////////////////////
 
-void gameloop() {
+void GAME_LOOP() {
 
-	// draw blank board
+	// draw blank GAMEBOARD[
+	for (int i = 0; i < 40; i++){ // 2 wide
+		for (int j = 0; j < 30; j++){ // 3 wide
+			addch(ACS_CKBOARD);
+			move(i,j);
+		}
+	}
+
+	refresh();
+	getchar();
+
 	for (int i = 0; i < 20; i++){
 		move(i,10);
 		printw("|");
 	}
 	
 	
-	generateBlock();
-	activeBlock();
+	BLOCK_GENERATE();
+	BLOCK_PULL();
 	
-	ULPY = 0;
-	ULPX = 4;
-	drawBlock(1);
+	ANCHOR_Y = 0;
+	ANCHOR_X = 4;
+	BLOCK_DRAW(1);
 	
 	int ch = 'p';
 	
 	refresh();
 	
 	signal(SIGALRM,sighandler); // Register signal handler
-	ualarm((useconds_t)(level * 100000), 0);
+	ualarm((useconds_t)(USER_LEVEL * 100000), 0);
 			
 	while (ch != 'e') {
-		if (!pauseIn) {
+		if (!PAUSE) {
 		switch(ch) {
 			case 'w':	// rotate
-			drawBlock(0);
-			rotateBlock();
-			if (!checkCollision(2)) {
-				rotateBlock(); rotateBlock(); rotateBlock();
+			BLOCK_DRAW(0);
+			BLOCK_ROTATE();
+			if (!CHECK_COLLISION(2)) {
+				BLOCK_ROTATE(); BLOCK_ROTATE(); BLOCK_ROTATE();
 			}
-			drawBlock(1);
+			BLOCK_DRAW(1);
 			break;
 			
 			case 'a':	// check left:
-			if (checkCollision(0)) {
-				drawBlock(0);
-				ULPX = ULPX - 1;
-				drawBlock(1);
+			if (CHECK_COLLISION(0)) {
+				BLOCK_DRAW(0);
+				ANCHOR_X = ANCHOR_X - 1;
+				BLOCK_DRAW(1);
 			}
 			break;
 			
 			case 'd':	// check right:
-			if (checkCollision(1)) {
-				drawBlock(0);
-				ULPX = ULPX + 1;
-				drawBlock(1);
+			if (CHECK_COLLISION(1)) {
+				BLOCK_DRAW(0);
+				ANCHOR_X = ANCHOR_X + 1;
+				BLOCK_DRAW(1);
 			}
 			break;
 			
@@ -396,9 +408,9 @@ void gameloop() {
 				sighandler(SIGALRM);
 			break;
 			
-			// levels are broken. implementing later
+			// USER_LEVELs are broken. implementing later
 			//case 'l':
-			//level--;
+			//USER_LEVEL--;
 			//break;
 			
 			default: break;
@@ -416,24 +428,24 @@ void gameloop() {
 
 void sighandler(int signum) {
 	
-	if (checkCollision(3)) { // default case for collision detection
-		drawBlock(0);
-		ULPY = ULPY + 1;
-		drawBlock(1);
+	if (CHECK_COLLISION(3)) { // default case for collision detection
+		BLOCK_DRAW(0);
+		ANCHOR_Y = ANCHOR_Y + 1;
+		BLOCK_DRAW(1);
 		
-		ualarm((useconds_t)(level * 100000), 0);
+		ualarm((useconds_t)(USER_LEVEL * 100000), 0);
 		
 		DEBUG();
-		move(ULPY, ULPX);
+		move(ANCHOR_Y, ANCHOR_X);
 	}
 	else {
-		writeBlock();
-		activeBlock();
+		BLOCK_WRITE();
+		BLOCK_PULL();
 		
-		ULPX = 4;
-		ULPY = 0;
+		ANCHOR_X = 4;
+		ANCHOR_Y = 0;
 		
-		drawBlock(1);
+		BLOCK_DRAW(1);
 		refresh();
 		
 		DEBUG();
@@ -451,7 +463,7 @@ int main(){
 	srand((unsigned) time(&t));	// Use current time to seed random number generation
 	
 	initscr();			// Begin curses
-	gameloop();			// active game code
+	GAME_LOOP();			// active game code
 	endwin();			// End curses mode
 
 	return 0;
@@ -461,7 +473,7 @@ int main(){
 // window is 36x21 chars
 //.....____________________...........
 //....|....................|..........
-//....|....................|..Score:..
+//....|....................|..USER_SCORE:..
 //....|....................|.{XXXXXX}.
 //....|....................|..........
 //....|....................|..........
