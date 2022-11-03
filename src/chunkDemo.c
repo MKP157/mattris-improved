@@ -6,12 +6,14 @@
 
 
 void main() {
-    chunk D = {0,1,NULL};
-    chunk C = {2,3, &D};
-    chunk B = {4,5, &C};
-    chunk A = {6,7, &B};
-
-    chunkList ABCD = {&A};
+    chunk *D = createChunk(0,1);
+    chunk *C = addChunk(2,3,&D);
+    chunk *B = addChunk(4,5,&C);
+	chunk *A = addChunk(6,7,&B);
+	
+    chunkList *ABCD = malloc(sizeof(chunkList));
+    ABCD->pos = &A;
+    
     int *x;
     int *y;
 
