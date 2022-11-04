@@ -21,6 +21,8 @@ typedef block* p_block;
 // ------------------------------------------------------
 
 // Functions --------------------------------------------
+
+// Create a new block
 p_chunk block_newChunk(int KEY, int temp_Rx, int temp_Ry) {
 	p_chunk z = (p_chunk)malloc(sizeof(chunk));
 	z->k = KEY;

@@ -1,0 +1,4 @@
+1. title screen {DONE}
+2. level select
+3. highscores
+4. background {DONE}

@@ -12,6 +12,10 @@ int main() {
 	canvas(1);
 	getchar();
 	
+	//WINDOW *board;
+	//board = create_newwin(40,30,10,10);
+	//draw_borders(board);
+	
 	canvas(2);
 	getchar();
 	
