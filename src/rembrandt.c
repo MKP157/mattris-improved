@@ -88,14 +88,20 @@ void layeredRefresh(int layers) {
 	// bottom 3 : stdscr
 
 	for (int i = 0; i < 2; i++) {
-		if (layers > 2) { if (i) refresh(); }
+		if (layers > 2) { 
+			if (i) refresh(); 
+		}
 		if (layers > 1) {
 			if (!i) { overwrite(next, stdscr); overwrite(stats, stdscr); overwrite(frame, stdscr); }
 			else { wrefresh(next); wrefresh(stats); wrefresh(frame); }
 		}
 		// we always want to refresh board
-		if (i) { overwrite(board, frame); }
-		else { wrefresh(board); }
+		if (i) { 
+			overwrite(board, frame); 
+		}
+		else { 
+			wrefresh(board); 
+		}
 	}
 }
 // ------------------------------------------------------

@@ -30,6 +30,7 @@ void main() {
 	
 	REFRESHWAIT;
 	
+	clear();
 	block_destroy(&lst);
 	block_printw(&lst);
 	

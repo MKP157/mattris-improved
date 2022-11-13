@@ -50,15 +50,15 @@ void block_print(p_block plst) {
 	}
 }
 
-void block_printw(p_block plst, int x) {
+void block_printw(int origX, int origY, p_block plst, int x) {
 	p_chunk z = plst->head;
 	while(z) {
-		move(z->Ry, z->Rx);
-		printw("%d", z->k);
+		move((int)(origY + z->Ry), (int)(origX + z->Rx));
+		//printw("%d", z->k);
 		
 		
-		//if (x) printw("X");
-		//else   printw(".");
+		if (x) printw("X");
+		else   printw(".");
 		z = z->next;
 	}
 }
