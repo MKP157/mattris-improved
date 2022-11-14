@@ -1,6 +1,9 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include <curses.h>
+#include <signal.h>
+#include <time.h>
 
 #include "blockstruct.h"
 #include "rembrandt.c"
@@ -10,7 +13,11 @@
 #define WRITETOBOARD block_wprintw(board, x,y,&lst,1)
 #define CLEARREF clear();refresh()
 
-block lst, temp;
+#define XSCALE 3
+#define YSCALE 2
+
+block lst;
+int arr[20][10] = {0};
 
 /*void blockGen() {
 	int r = rand() % 7;
@@ -26,6 +33,22 @@ block lst, temp;
 void blockToPlay() {
 
 }*/
+
+void generateNoise(int n) {
+	printf("Generating noise!");
+	for (int i = 20; i > 20-(n*2); i--) {
+		for (int j = 0; j < 9; j++) {
+			arr[i][j] = rand() & 1;
+			
+			if (arr[i][j]) {
+				printf("%d", arr[i][j]);	
+				noise_wprintw(board,i,j);
+			}
+		}
+	}
+	
+	layeredRefresh(1);
+}
 
 void menuloop(int selection) { 
 	canvas(selection + 2, selection + 2);
@@ -89,7 +112,7 @@ void menuloop(int selection) {
 	
 	if (ch == 'e') { titleloop(); }
 	
-	else { gameloop(++levelSelection, ++noiseSelection); }	
+	else { gameloop(++levelSelection, ++noiseSelection, selection); }	
 }
 
 void titleloop() {
@@ -103,6 +126,8 @@ void titleloop() {
 	mvprintw(6,101, "[D]  Move Block Downward");
 	mvprintw(8,101, "[Enter]            Pause");
 	mvprintw(9,101, "[E]        Quit to Title");
+	
+	mvprintw(13,21, "(*)");
 	refresh();
 	
 	int selection = 0;
@@ -134,19 +159,52 @@ void titleloop() {
 	menuloop(selection);
 }
 
-void gameloop(int level, int noise) {
+void sighandler(int signum) {
+	
+	/*if (CHECK_COLLISION(3)) { // default case for collision detection
+		BLOCK_DRAW(0);
+		ANCHOR_Y = ANCHOR_Y + 1;
+		BLOCK_DRAW(1);
+		
+		ualarm((useconds_t)(USER_LEVEL * 100000), 0);
+		
+		DEBUG();
+		move(ANCHOR_Y, ANCHOR_X);
+	}
+	else {
+		BLOCK_WRITE();
+		BLOCK_PULL();
+		
+		ANCHOR_X = 4;
+		ANCHOR_Y = 0;
+		
+		BLOCK_DRAW(1);
+		refresh();
+		
+		DEBUG();
+		sighandler(SIGALRM);
+	}
+	
+	refresh();*/
+}
+
+void gameloop(int level, int noise, int selection) {
 	//blockGen();
 	//blockToPlay();
 	
-	int arr[20][10] = {0};
-	
 	gameWindowInit();
-	canvas(4,4);
+	canvas(4 + selection,4);
+	
+	if (selection) generateNoise(noise);
+	
 	layeredRefresh(3);
 	
-	int x = 5, y = 0;
+	int x = 5*3, y = 0;
 	
 	block_wprintw(board,x,y,&lst,1);
+	
+	signal(SIGALRM,sighandler); // Register signal handler
+	ualarm((useconds_t)(1000000 / level), 0);
 	
 	char ch = 'e';
 	
@@ -199,16 +257,26 @@ void gameloop(int level, int noise) {
 
 void main() {
 
-	// Required Inits, in order: curses, Rembrandt, current block and block in queue
+	// Required Inits, in order: curses, Rembrandt, random number generation current block and block in queue
 	initscr();
 	rembrandtInit();
-	
+	time_t t;	srand((unsigned) time(&t));
 	// -------------------------------------------
 	
 
 	block_init(&lst);
-	block_init(&temp);
 	
+	p_chunk x = block_newChunk(1,0,0);
+	block_insert(&lst, x);
+	
+	x = block_newChunk(2,1,0);
+	block_insert(&lst, x);
+	
+	x = block_newChunk(3,0,1);
+	block_insert(&lst, x);
+	
+	x = block_newChunk(4,1,1);
+	block_insert(&lst, x);
 	
 	/*// draw blank board
 	for (int i = 0; i < 20; i++) {

@@ -8,6 +8,7 @@
 // but rather a reminder to myself when making the ASCII graphics.
 #define MAXLEN 99
 #define MAXHEIGHT 51
+#define WINDRAWCHECKERROW waddch(win, ACS_CKBOARD); waddch(win, ACS_CKBOARD); waddch(win, ACS_CKBOARD) 
 // ------------------------------------------------------
 
 
@@ -122,13 +123,14 @@ int canvas(int x, int colour) {
 		case 2: load = fopen("./graphics/typea.txt", "r"); break;
 	// Type B menu
 		case 3: load = fopen("./graphics/typeb.txt", "r"); break;
-		
+	// Type A background
 		case 4: load = fopen("./graphics/bg.txt", "r"); break;
-		
+	// Type B background
+		case 5: load = fopen("./graphics/bg2.txt", "r"); break;
 		default: break;
 	}
 	
-	palette(colour);
+	attron(COLOR_PAIR(colour));
 	
 	if (load == NULL) {
 		printf("Bad file!");
@@ -142,14 +144,10 @@ int canvas(int x, int colour) {
 	
 	fclose(load);
      	refresh();
-	
+	attroff(COLOR_PAIR(colour));
 	return 1;
 }
 // ------------------------------------------------------
-
-void palette(int c) {
-	attron(COLOR_PAIR(c));
-}
 
 void bmove(int Y, int X) {
 	move((Y-1)*2,(X-1)*3);
@@ -184,15 +182,26 @@ void block_wprintw(WINDOW *win, int origX, int origY, p_block plst, int x) {
 		
 		
 		if (x)  {
-			waddch(win, ACS_CKBOARD); waddch(win, ACS_CKBOARD); waddch(win, ACS_CKBOARD); 
+			wattron(win, COLOR_PAIR(2));
+			WINDRAWCHECKERROW;
 			wmove(win, (int)(origY + z->Ry*2 + 1), (int)(origX + z->Rx*3));
-			waddch(win, ACS_CKBOARD); waddch(win, ACS_CKBOARD); waddch(win, ACS_CKBOARD); 
+			WINDRAWCHECKERROW;
+			wattroff(win, COLOR_PAIR(2));
 		}
 		else {
+			wattron(win, COLOR_PAIR(1));
 			wprintw(win, "   ");
 			wmove(win, (int)(origY + z->Ry*2 + 1), (int)(origX + z->Rx*3));
 			wprintw(win, "  .");
+			wattroff(win, COLOR_PAIR(1));
 		}
 		z = z->next;
 	}
+}
+
+void noise_wprintw(WINDOW *win, int y, int x) {
+	wmove(win, y*2, x*3);
+	WINDRAWCHECKERROW;
+	wmove(win, y*2+1, x*3);
+	WINDRAWCHECKERROW;
 }
