@@ -117,11 +117,11 @@ int canvas(int x, int colour) {
 	
 	switch (x) {
 	// Title Screen ------------------
-		case 1: load = fopen("../graphics/title.txt", "r"); break;
+		case 1: load = fopen("./graphics/title.txt", "r"); break;
 	// Highscores, or game choice
-		case 2: load = fopen("../graphics/bg.txt", "r"); break;
+		case 2: load = fopen("./graphics/bg.txt", "r"); break;
 	// Background
-		case 3: load = fopen("../graphics/bg.txt", "r"); break;
+		case 3: load = fopen("./graphics/bg.txt", "r"); break;
 		
 		default:
 	}
@@ -169,6 +169,27 @@ void block_printw(int origX, int origY, p_block plst, int x) {
 			printw("   ");
 			move((int)(origY + z->Ry*2 + 1), (int)(origX + z->Rx*3));
 			printw("  .");
+		}
+		z = z->next;
+	}
+}
+
+void block_wprintw(WINDOW *win, int origX, int origY, p_block plst, int x) {
+	p_chunk z = plst->head;
+	while(z) {
+		wmove(win, (int)(origY + z->Ry*2), (int)(origX + z->Rx*3));
+		//printw("%d", z->k);
+		
+		
+		if (x)  {
+			waddch(win, ACS_CKBOARD); waddch(win, ACS_CKBOARD); waddch(win, ACS_CKBOARD); 
+			wmove(win, (int)(origY + z->Ry*2 + 1), (int)(origX + z->Rx*3));
+			waddch(win, ACS_CKBOARD); waddch(win, ACS_CKBOARD); waddch(win, ACS_CKBOARD); 
+		}
+		else {
+			wprintw(win, "   ");
+			wmove(win, (int)(origY + z->Ry*2 + 1), (int)(origX + z->Rx*3));
+			wprintw(win, "  .");
 		}
 		z = z->next;
 	}
