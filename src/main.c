@@ -8,6 +8,7 @@
 
 #define ERASEFROMBOARD block_wprintw(board, x,y,&lst,0)
 #define WRITETOBOARD block_wprintw(board, x,y,&lst,1)
+#define CLEARREF clear();refresh()
 
 block lst, temp;
 
@@ -26,43 +27,121 @@ void blockToPlay() {
 
 }*/
 
-void titleloop() {
-	canvas(0,0);
+void menuloop(int selection) { 
+	canvas(selection + 2, selection + 2);
 	refresh();
-	mvprintw(13,8,"Game Type A");
-	mvprintw(15,8,"Game Type B");
 	
+	int levelSelection = 0, 
+		noiseSelection = 0, 
+		cX = 22, 
+		cY = 18, 
+		menuType = 0;
 	
+	char ch = 'z';
 	
-	int selection = 1;
-	char ch = 'a';
-	
-	while (ch) {
-		ch = getchar();
+	while ((ch != 13) && (ch != 'e')) {
+		switch(ch) {
+			case 'a':
+				if(!menuType && levelSelection) {
+					mvprintw(17,21 + levelSelection-- * 5,"  "); 	// menuType=0 and levelSelection > 0
+					mvprintw(17,21 + levelSelection * 5,"->");
+				}
+				if(menuType && noiseSelection) {
+					mvprintw(24,21 + noiseSelection-- * 5,"  "); 	// menuType=1 and noiseSelection > 0
+					mvprintw(24,21 + noiseSelection * 5,"->");
+				}
+			break;
+			
+			case 'd':
+				if(!menuType && levelSelection < 8) {
+					mvprintw(17,21 + levelSelection++ * 5,"  ");	// menuType=0 and levelSelection < 9
+					mvprintw(17,21 + levelSelection * 5,"->");
+				}
+				if(menuType && noiseSelection < 8) {
+					mvprintw(24,21 + noiseSelection++ * 5,"  ");	// menuType=1 and noiseSelection < 9
+					mvprintw(24,21 + noiseSelection * 5,"->");
+				}
+			break;
+			
+			case 'w':
+				if(menuType && selection) { menuType--; mvprintw(17,13,"-->"); mvprintw(24,13,"   "); }
+			break;
+			
+			case 's':
+				if(!menuType && selection) { menuType++; mvprintw(17,13,"   "); mvprintw(24,13,"-->"); }
+			break;
+			
+			default: break;
+		} 
 		
-		if (ch == 'w') {
-			mvprintw(13,21, "(*)");
-			mvprintw(15,21, "   ");
-			refresh();
-			selection = 1;
-		}
-		if (ch == 's') {
-			mvprintw(13,21, "   ");
-			mvprintw(15,21, "(*)");
-			refresh();
-			selection = 2;
-		}
+		// For debugging:
+		mvprintw(0,0,"%d",levelSelection);
+		mvprintw(1,0,"%d",noiseSelection);
+		mvprintw(2,0,"%d",menuType);
+		mvprintw(3,0,"%d",selection);
+		
+		refresh();
+		
+		ch = getchar();
 	}
+	
+	CLEARREF;
+	
+	if (ch == 'e') { titleloop(); }
+	
+	else { gameloop(++levelSelection, ++noiseSelection); }	
 }
 
-void gameloop() {
+void titleloop() {
+	canvas(1,1);
+	mvprintw(13,8,"Game Type A");
+	mvprintw(15,8,"Game Type B");
+	mvprintw(1,101, "Controls  --------------");
+	mvprintw(3,101, "[W]         Rotate Block");
+	mvprintw(4,101, "[A]  Move Block Leftward");
+	mvprintw(5,101, "[S] Move Block Rightward");
+	mvprintw(6,101, "[D]  Move Block Downward");
+	mvprintw(8,101, "[Enter]            Pause");
+	mvprintw(9,101, "[E]        Quit to Title");
+	refresh();
+	
+	int selection = 0;
+	char ch = 'a';
+	
+	while (ch != 13) {
+		switch(ch) {
+			case 'w':
+				mvprintw(13,21, "(*)");
+				mvprintw(15,21, "   ");
+				refresh();
+				selection = 0;
+			break;
+		
+			case 's':
+				mvprintw(13,21, "   ");
+				mvprintw(15,21, "(*)");
+				refresh();
+				selection = 1;
+			break;
+			
+			default: break;
+		} 
+		// char debug printf("%d", ch);
+		ch = getchar();
+	}
+	CLEARREF;
+	
+	menuloop(selection);
+}
+
+void gameloop(int level, int noise) {
 	//blockGen();
 	//blockToPlay();
 	
 	int arr[20][10] = {0};
 	
 	gameWindowInit();
-	canvas(3,2);
+	canvas(4,4);
 	layeredRefresh(3);
 	
 	int x = 5, y = 0;

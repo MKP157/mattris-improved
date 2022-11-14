@@ -33,11 +33,11 @@ void rembrandtInit() {
 	
 	init_pair(1, COLOR_WHITE, COLOR_BLACK);
 		// Title screen colours
-	init_pair(2, COLOR_BLUE, COLOR_BLACK);
-		// High scores
-	init_pair(3, COLOR_RED, COLOR_BLACK);
-		//
-	// !!! 4 IS USED BY GRADIENT
+	init_pair(2, COLOR_CYAN, COLOR_BLACK);
+		// Type A
+	init_pair(3, COLOR_GREEN, COLOR_BLACK);
+		// Type B
+	init_pair(4, COLOR_WHITE, COLOR_BLUE);
 }
 // -------------------------------------------------------
 
@@ -118,12 +118,14 @@ int canvas(int x, int colour) {
 	switch (x) {
 	// Title Screen ------------------
 		case 1: load = fopen("./graphics/title.txt", "r"); break;
-	// Highscores, or game choice
-		case 2: load = fopen("./graphics/bg.txt", "r"); break;
-	// Background
-		case 3: load = fopen("./graphics/bg.txt", "r"); break;
+	// Type A menu
+		case 2: load = fopen("./graphics/typea.txt", "r"); break;
+	// Type B menu
+		case 3: load = fopen("./graphics/typeb.txt", "r"); break;
 		
-		default:
+		case 4: load = fopen("./graphics/bg.txt", "r"); break;
+		
+		default: break;
 	}
 	
 	palette(colour);
