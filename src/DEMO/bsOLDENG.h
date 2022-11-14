@@ -57,8 +57,8 @@ void block_printw(int origX, int origY, p_block plst, int x) {
 		//printw("%d", z->k);
 		
 		
-		if (x) printw("X");
-		else   printw(".");
+		if (x) printw("#");
+		else   printw(" ");
 		z = z->next;
 	}
 }

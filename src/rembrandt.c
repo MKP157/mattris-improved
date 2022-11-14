@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <curses.h>
 
+#include "blockstruct.h"
+
 // These macros define the maximum size of the terminal graphics. This isn't concrete,
 // but rather a reminder to myself when making the ASCII graphics.
 #define MAXLEN 99
@@ -147,15 +149,27 @@ void palette(int c) {
 	attron(COLOR_PAIR(c));
 }
 
-/*
-WINDOW* drawBoard() {
-	WINDOW *B;
-	int w = 34, h = 44;
-	B = newwin(44,34,5,10);
-	
-	char X = 97;
-	for (int i = 0; i < w; i++) {
-		for (int j 
-	 
-	mvwprint(B,)	
-}*/
+void bmove(int Y, int X) {
+	move((Y-1)*2,(X-1)*3);
+}
+
+void block_printw(int origX, int origY, p_block plst, int x) {
+	p_chunk z = plst->head;
+	while(z) {
+		move((int)(origY + z->Ry*2), (int)(origX + z->Rx*3));
+		//printw("%d", z->k);
+		
+		
+		if (x)  {
+			addch(ACS_CKBOARD);addch(ACS_CKBOARD);addch(ACS_CKBOARD);
+			move((int)(origY + z->Ry*2 + 1), (int)(origX + z->Rx*3));
+			addch(ACS_CKBOARD);addch(ACS_CKBOARD);addch(ACS_CKBOARD);
+		}
+		else {
+			printw("   ");
+			move((int)(origY + z->Ry*2 + 1), (int)(origX + z->Rx*3));
+			printw("  .");
+		}
+		z = z->next;
+	}
+}

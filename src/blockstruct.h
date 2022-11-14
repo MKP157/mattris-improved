@@ -1,5 +1,10 @@
 #include <stdlib.h>
 
+// Include guards
+#pragma once
+#ifndef BLOCKSTRUCT_H
+#define BLOCKSTRUCT_H
+
 // Definitions ------------------------------------------
 typedef struct __chunk{
     int k;	// Position key for debugging.
@@ -42,27 +47,6 @@ void block_insert(p_block plst, p_chunk z) {
 	plst->head = z;
 }
 
-void block_print(p_block plst) {
-	p_chunk z = plst->head;
-	while(z) {
-		printf("%d %d %d \n", z->k, z->Rx, z-> Ry);
-		z = z->next;
-	}
-}
-
-void block_printw(p_block plst, int x) {
-	p_chunk z = plst->head;
-	while(z) {
-		move(z->Ry, z->Rx);
-		printw("%d", z->k);
-		
-		
-		//if (x) printw("X");
-		//else   printw(".");
-		z = z->next;
-	}
-}
-
 p_chunk block_delete(p_block plst, p_chunk z) {
 	if (z->prev != NULL) {
 		z->prev->next = z->next;
@@ -84,4 +68,19 @@ void block_destroy(p_block plst) {
 	}
 }
 
+// TO BE LEFT TO REMBRANDT (kept here for debug only) ---
+
+void block_print(p_block plst) {
+	p_chunk z = plst->head;
+	while(z) {
+		printf("%d %d %d \n", z->k, z->Rx, z-> Ry);
+		z = z->next;
+	}
+}
+
+
+
+// ------------------------------------------------------
+
+#endif
 

@@ -40,7 +40,7 @@ void main() {
 
 void physloop() {
 	
-	int x = 5, y = 0;
+	int x = 15, y = 0;
 	
 	block_printw(x,y,&lst,1);
 	
@@ -74,4 +74,33 @@ void physloop() {
 		
 		refresh(); ch = getchar();
 	}
+	
+	/*while (ch) {
+		switch(ch) {
+		case 'w':
+		if ((y-1) != -1) {
+			block_printw(x,y,&lst,0);
+			block_printw(x,--y,&lst,1);
+		}
+		break;
+		case 'a':
+		if ((x-1) != -1) {
+			block_printw(x,y,&lst,0);
+			block_printw(--x,y,&lst,1);
+		}
+		break;
+		case 's':
+			block_printw(x,y,&lst,0);
+			block_printw(x,++y,&lst,1);
+		break;
+		case 'd':
+			block_printw(x,y,&lst,0);
+			block_printw(++x,y,&lst,1);
+		break;
+		
+		default: break;
+		}
+		
+		refresh(); ch = getchar();
+	}*/
 }
