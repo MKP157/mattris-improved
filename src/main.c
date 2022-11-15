@@ -34,24 +34,25 @@ void blockToPlay() {
 
 }*/
 
-void generateNoise(int n) {
-	printf("Generating noise!");
-	for (int i = 20; i > 20-(n*2); i--) {
-		for (int j = 0; j < 9; j++) {
-			arr[i][j] = rand() & 1;
+void generateNoise(int n, int skip) {
+	//printf("Generating noise!");
+	for (int i = 19; i > 20-(n*2); i--) {
+		for (int j = 0; j < 10; j++) {
+			if (!skip) arr[i][j] = rand() & 1;
 			
 			if (arr[i][j]) {
-				printf("%d", arr[i][j]);	
 				noise_wprintw(board,i,j);
+				
+				// Debug:
+				mvprintw(i,j+100,"%d",arr[i][j]);
 			}
 		}
 	}
-	
-	layeredRefresh(1);
+	layeredRefresh(3);
 }
 
 void menuloop(int selection) { 
-	canvas(selection + 2, selection + 2);
+	canvas(selection + 2, COLOR_BLUE - selection*2);
 	refresh();
 	
 	int levelSelection = 0, 
@@ -62,7 +63,7 @@ void menuloop(int selection) {
 	
 	char ch = 'z';
 	
-	while ((ch != 13) && (ch != 'e')) {
+	while ((ch != 13) && (ch != 'x')) {
 		switch(ch) {
 			case 'a':
 				if(!menuType && levelSelection) {
@@ -116,7 +117,9 @@ void menuloop(int selection) {
 }
 
 void titleloop() {
-	canvas(1,1);
+	canvas(1,COLOR_WHITE);
+	
+	// Not included in title screen file.
 	mvprintw(13,8,"Game Type A");
 	mvprintw(15,8,"Game Type B");
 	mvprintw(1,101, "Controls  --------------");
@@ -193,16 +196,34 @@ void gameloop(int level, int noise, int selection) {
 	//blockToPlay();
 	
 	gameWindowInit();
-	canvas(4 + selection,4);
 	
-	if (selection) generateNoise(noise);
+	int x = 0*XSCALE, y = 0*YSCALE;
 	
-	layeredRefresh(3);
+	// Type A and Type B differentiate here. ----------------
+	// Type A = 0
+		canvas(4 + selection,COLOR_BLUE);
+		if (!selection) {
+			canvas(4 + selection,COLOR_BLUE);
+			eraseBoard();
+			layeredRefresh(3);
+			// Unpause animation doubles as a starting animation
+			gameunpause();
+		}
+	// Type B = 0
+		else {
+			canvas(4 + selection,COLOR_GREEN);
+			eraseBoard();
+			layeredRefresh(3);
+			gameunpause();
+			generateNoise(noise, 0);
+		}
+	// ------------------------------------------------------
 	
-	int x = 5*3, y = 0;
-	
-	block_wprintw(board,x,y,&lst,1);
-	
+	// Starting position
+	// Coordinates work as follows: x or y = (board array pos)*(scale)
+	x = 5*XSCALE;
+	y = 0*YSCALE;
+	WRITETOBOARD;
 	signal(SIGALRM,sighandler); // Register signal handler
 	ualarm((useconds_t)(1000000 / level), 0);
 	
@@ -243,6 +264,14 @@ void gameloop(int level, int noise, int selection) {
 			}
 		break;
 		
+		case 13:
+			ualarm(0, 0);	// Cancel alarm
+			gamepause();
+			gameunpause();
+			WRITETOBOARD;
+			layeredRefresh(3);
+		break;
+		
 		default: break;
 		}
 		
@@ -260,7 +289,10 @@ void main() {
 	// Required Inits, in order: curses, Rembrandt, random number generation current block and block in queue
 	initscr();
 	rembrandtInit();
-	time_t t;	srand((unsigned) time(&t));
+	
+	// Seed random numbers based off of system time. True randomness! It'll never seed the same value twice.
+	time_t t;	
+	srand((unsigned) time(&t));
 	// -------------------------------------------
 	
 

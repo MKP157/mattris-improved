@@ -7,7 +7,7 @@
 
 // Definitions ------------------------------------------
 typedef struct __chunk{
-    int k;	// Position key for debugging.
+    int k;	// Color key!
     int Rx;	// Placement in block structure, relative to the anchor's x.
     int Ry;	// Placement in block structure, relative to the anchor's y.
     
