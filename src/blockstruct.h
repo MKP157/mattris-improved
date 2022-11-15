@@ -7,7 +7,14 @@
 
 // Definitions ------------------------------------------
 typedef struct __chunk{
-    int k;	// Color key!
+    int k;	// Block key (also determines colour)
+    		// 1 : T
+    		// 2 : I
+    		// 3 : O
+    		// 4 : J
+    		// 5 : L
+    		// 6 : S
+    		// 7 : Z
     int Rx;	// Placement in block structure, relative to the anchor's x.
     int Ry;	// Placement in block structure, relative to the anchor's y.
     
@@ -77,9 +84,6 @@ void block_print(p_block plst) {
 		z = z->next;
 	}
 }
-
-
-
 // ------------------------------------------------------
 
 #endif

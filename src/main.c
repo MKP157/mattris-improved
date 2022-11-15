@@ -285,39 +285,19 @@ void gameloop(int level, int noise, int selection) {
 
 
 void main() {
-
+	printf("%d", loadBlockData(6));
+	getchar();
 	// Required Inits, in order: curses, Rembrandt, random number generation current block and block in queue
 	initscr();
 	rembrandtInit();
+	block_init(&lst);
 	
 	// Seed random numbers based off of system time. True randomness! It'll never seed the same value twice.
 	time_t t;	
 	srand((unsigned) time(&t));
 	// -------------------------------------------
 	
-
-	block_init(&lst);
-	
-	p_chunk x = block_newChunk(1,0,0);
-	block_insert(&lst, x);
-	
-	x = block_newChunk(2,1,0);
-	block_insert(&lst, x);
-	
-	x = block_newChunk(3,0,1);
-	block_insert(&lst, x);
-	
-	x = block_newChunk(4,1,1);
-	block_insert(&lst, x);
-	
-	/*// draw blank board
-	for (int i = 0; i < 20; i++) {
-		for (int j = 0; j < 10; j++) {
-			mvprintw((i)*2+1,(j)*3+2,".");
-		}
-	}*/
-	
-	
+	pullBlock(&lst);
 	
 	//////////////////// to be put in menu-nav method
 	titleloop();
