@@ -20,8 +20,6 @@ int loadBlockData(int block) {
      	
      	while (fgets(line, B_DATALEN, load)) {	
      		temp = atoi(line);
-     		printf("%d\n", temp);
-     		
      		if ((temp / 100000000) == block) break;
 	}
 	

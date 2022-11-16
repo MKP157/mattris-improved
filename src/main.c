@@ -9,8 +9,8 @@
 #include "rembrandt.c"
 //#include "locknload.h"
 
-#define ERASEFROMBOARD block_wprintw(board, x,y,&lst,0)
-#define WRITETOBOARD block_wprintw(board, x,y,&lst,1)
+#define ERASEFROMBOARD block_wprintw(board,XSCALE*x,YSCALE*y,&lst,0)
+#define WRITETOBOARD block_wprintw(board,XSCALE*x,YSCALE*y,&lst,1)
 #define CLEARREF clear();refresh()
 
 #define XSCALE 3
@@ -18,38 +18,6 @@
 
 block lst;
 int arr[20][10] = {0};
-
-/*void blockGen() {
-	int r = rand() % 7;
-	p_chunk x;
-	load(r);
-	
-	for (int i = 0; i < 4; i++) {
-		x = block_newChunk(i,a,b);
-		block_insert(&temp, x);
-	}
-}
-
-void blockToPlay() {
-
-}*/
-
-void generateNoise(int n, int skip) {
-	//printf("Generating noise!");
-	for (int i = 19; i > 20-(n*2); i--) {
-		for (int j = 0; j < 10; j++) {
-			if (!skip) arr[i][j] = rand() & 1;
-			
-			if (arr[i][j]) {
-				noise_wprintw(board,i,j);
-				
-				// Debug:
-				mvprintw(i,j+100,"%d",arr[i][j]);
-			}
-		}
-	}
-	layeredRefresh(3);
-}
 
 void menuloop(int selection) { 
 	canvas(selection + 2, COLOR_BLUE - selection*2);
@@ -61,7 +29,7 @@ void menuloop(int selection) {
 		cY = 18, 
 		menuType = 0;
 	
-	char ch = 'z';
+	char ch = 'A';
 	
 	while ((ch != 13) && (ch != 'x')) {
 		switch(ch) {
@@ -162,6 +130,73 @@ void titleloop() {
 	menuloop(selection);
 }
 
+
+/*////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+ /$$$$$$$  /$$   /$$ /$$     /$$ /$$$$$$  /$$$$$$  /$$$$$$   /$$$$$$ //////////////////////////////////////////////////////////////////
+| $$__  $$| $$  | $$|  $$   /$$//$$__  $$|_  $$_/ /$$__  $$ /$$__  $$//////////////////////////////////////////////////////////////////
+| $$  \ $$| $$  | $$ \  $$ /$$/| $$  \__/  | $$  | $$  \__/| $$  \__///////////////////////////////////////////////////////////////////
+| $$$$$$$/| $$$$$$$$  \  $$$$/ |  $$$$$$   | $$  | $$      |  $$$$$$ //////////////////////////////////////////////////////////////////
+| $$____/ | $$__  $$   \  $$/   \____  $$  | $$  | $$       \____  $$//////////////////////////////////////////////////////////////////
+| $$      | $$  | $$    | $$    /$$  \ $$  | $$  | $$    $$ /$$  \ $$//////////////////////////////////////////////////////////////////
+| $$      | $$  | $$    | $$   |  $$$$$$/ /$$$$$$|  $$$$$$/|  $$$$$$///////////////////////////////////////////////////////////////////
+|__/      |__/  |__/    |__/    \______/ |______/ \______/  \______/ //////////////////////////////////////////////////////////////////
+									*/////////////////////////////////////////////////////////////
+
+
+int collision(char dir, p_block plst, int y, int x) {
+	int modX, modY, newX, newY, n;
+	
+	switch(dir) {
+		case 'a':	// 0 = left
+		modX = -1; modY = 0;
+		break;
+		
+		case 'd': //1 = right
+		modX = 1; modY = 0;
+		break;
+		
+		default: //3 = down
+		modX = 0; modY = 1;
+		break;
+	}
+	
+	p_chunk z = plst->head;
+	while(z) {
+		newX = x + modX + z->Rx;
+		newY = y + modY + z->Ry;
+		
+		if (arr[newY][newX]) return 0;
+		if (newX < 0 || newX > 9) return 0;
+		if (newY < 0 || newY > 19) return 0;
+		z = z->next;
+	}
+	
+	return 1;
+}
+
+// Originally intended for generating board noise for type B games,
+// however this function also doubles as a board-redraw for the pause
+// menu. That's that the "skip" boolean condition is for; it skips
+// randomly populating the board for when all that's needed is a skip.
+
+void generateNoise(int n, int skip) {
+	//printf("Generating noise!");
+	for (int i = 19; i > 20-(n*2); i--) {
+		for (int j = 0; j < 10; j++) {
+			if (!skip) arr[i][j] = rand() & 1;
+			
+			if (arr[i][j]) {
+				noise_wprintw(board,i,j);
+				
+				// Debug:
+				mvprintw(i,j+100,"%d",arr[i][j]);
+			}
+		}
+	}
+	layeredRefresh(3);
+}
+
+
 void sighandler(int signum) {
 	
 	/*if (CHECK_COLLISION(3)) { // default case for collision detection
@@ -197,7 +232,7 @@ void gameloop(int level, int noise, int selection) {
 	
 	gameWindowInit();
 	
-	int x = 0*XSCALE, y = 0*YSCALE;
+	int x = 0, y = 0;
 	
 	// Type A and Type B differentiate here. ----------------
 	// Type A = 0
@@ -221,8 +256,8 @@ void gameloop(int level, int noise, int selection) {
 	
 	// Starting position
 	// Coordinates work as follows: x or y = (board array pos)*(scale)
-	x = 5*XSCALE;
-	y = 0*YSCALE;
+	x = 5;
+	y = 0;
 	WRITETOBOARD;
 	signal(SIGALRM,sighandler); // Register signal handler
 	ualarm((useconds_t)(1000000 / level), 0);
@@ -231,35 +266,31 @@ void gameloop(int level, int noise, int selection) {
 	
 	while (ch != 'x') {
 		switch(ch) {
+		
 		case 'w':
-			//if (((y-1) != -1) && collision(x,y,1)) {
-			if (((y-1) != -1)) {
-				ERASEFROMBOARD;
-				y -= 2;
-				WRITETOBOARD;
-			}
+		
 		break;
 		
 		case 'a':
-			if ((x-1) != -1) {
+			if (collision(ch, &lst, y, x)) {
 				ERASEFROMBOARD;
-				x -= 3;
+				x--;
 				WRITETOBOARD;
 			}
 		break;
 		
 		case 's':
-			if ((y+2) < 38) {
+			if (collision(ch, &lst, y, x)) {
 				ERASEFROMBOARD;
-				y += 2;
+				y++;
 				WRITETOBOARD;
 			}
 		break;
 		
 		case 'd':
-			if ((x+3) < 27) {
+			if (collision(ch, &lst, y, x)) {
 				ERASEFROMBOARD;
-				x += 3;
+				x++;
 				WRITETOBOARD;
 			}
 		break;
@@ -275,7 +306,16 @@ void gameloop(int level, int noise, int selection) {
 		default: break;
 		}
 		
-		layeredRefresh(1);
+		for (int i = 0; i < 20; i++) {
+			for (int j = 0; j < 10; j++) {
+				mvprintw(i,j+100,"%d",arr[i][j]);
+			}
+		}
+		
+		mvprintw(50,100,"y = %d",y);
+		mvprintw(51,100,"x = %d",x);
+		
+		layeredRefresh(3);
 		ch = getchar();
 	}
 	
@@ -285,8 +325,6 @@ void gameloop(int level, int noise, int selection) {
 
 
 void main() {
-	printf("%d", loadBlockData(6));
-	getchar();
 	// Required Inits, in order: curses, Rembrandt, random number generation current block and block in queue
 	initscr();
 	rembrandtInit();
