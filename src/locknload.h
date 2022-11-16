@@ -43,3 +43,28 @@ void pullBlock(p_block plst) {
 		block_insert(plst, x);
 	}
 }
+
+int blockToBin(p_block plst) {
+	FILE *outfile;
+	
+	// open file for writing
+	outfile = fopen ("person.dat", "w");
+	if (outfile == NULL)
+	{
+ 	       fprintf(stderr, "\nError opening file\n");
+		exit (1);
+	}
+	
+	// write struct to file
+	fwrite (&input1, sizeof(struct p_block), 1, outfile);
+ 	    
+	if(fwrite != 0)
+ 	       printf("contents to file written successfully !\n");
+	else
+		printf("error writing file !\n");
+	 
+	// close file
+	fclose (outfile);
+ 
+	return 0;
+}

@@ -75,6 +75,14 @@ void block_destroy(p_block plst) {
 	}
 }
 
+void block_clone(p_block plst, p_block plst2) {
+	p_chunk z = plst->head;
+	while(z) {
+		block_insert(plst2,z);
+		z = z->next;
+	}
+}
+
 // TO BE LEFT TO REMBRANDT (kept here for debug only) ---
 
 void block_print(p_block plst) {

@@ -144,20 +144,16 @@ void titleloop() {
 
 
 int collision(char dir, p_block plst, int y, int x) {
-	int modX, modY, newX, newY, n;
+	int modX = 0, modY = 0, newX, newY, n;
 	
 	switch(dir) {
-		case 'a':	// 0 = left
-		modX = -1; modY = 0;
-		break;
+		case 'a':  --modX;  break;
 		
-		case 'd': //1 = right
-		modX = 1; modY = 0;
-		break;
+		case 'd':  ++modX;  break;
 		
-		default: //3 = down
-		modX = 0; modY = 1;
-		break;
+		case 's':  ++modY;  break;
+		
+		default: break;
 	}
 	
 	p_chunk z = plst->head;
@@ -170,6 +166,39 @@ int collision(char dir, p_block plst, int y, int x) {
 		if (newY < 0 || newY > 19) return 0;
 		z = z->next;
 	}
+	return 1;
+}
+
+int rotation(p_block plst, int y, int x) {
+	// New temporary block 'r'; initialize as a copy of main block
+	block r;
+	block_init(&r);
+	r = *plst;
+	block_clone(plst,&r);
+	
+	int tempX, tempY;
+	
+	p_chunk z = (r.head);
+	
+	if (z->k == 3) return 0;
+		// [!] O blocks don't need rotation!
+		
+	while(z) {
+		// Clockwise 90deg: (x,y) -> (y,-x), or (y,x) -> (-x,y)
+		
+		// Center Rx=1,Ry=1 as origin:
+		tempY = z->Ry - 1;	
+		tempX = z->Rx - 1;
+		
+		z->Ry = (-1)*tempX + 1;
+		z->Rx = tempY + 1;
+		
+		z = z->next;
+	}
+	
+	if (!collision('w',&r,y,x)) return 0;
+		
+	*plst = r;
 	
 	return 1;
 }
@@ -268,7 +297,9 @@ void gameloop(int level, int noise, int selection) {
 		switch(ch) {
 		
 		case 'w':
-		
+			ERASEFROMBOARD;
+			rotation(&lst,y,x);
+			WRITETOBOARD;
 		break;
 		
 		case 'a':
