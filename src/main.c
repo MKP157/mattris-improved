@@ -171,7 +171,7 @@ int collision(char dir, p_block plst, int y, int x) {
 
 int rotation(p_block plst, int y, int x) {
 	p_chunk z = plst->head;
-	int tempY, tempX, newY, newX;
+	int tempY, tempX, newY, newX, store[8], i = 0;
 	
 	if (z->k == 3) return 0;
 		// [!] O blocks don't need rotation!
@@ -183,15 +183,25 @@ int rotation(p_block plst, int y, int x) {
 		tempY = z->Ry - 1;
 		tempX = z->Rx - 1;
 		
-		newY = (-1)*tempX + 1;
-		newX = tempY + 1;
+		newY = y + (-1)*tempX + 1;
+		newX = x + tempY + 1;
 		
-		if ((x + newX) < 0 || (x + newX) > 9) return 0;
-		if ((y + newY) < 0 || (y + newY) > 19) return 0;
+		if (arr[newY][newX]) return 0;
+		if ((newX) < 0 || (newX) > 9) return 0;
+		if ((newY) < 0 || (newY) > 19) return 0;
 		
-		z->Ry = newY;
-		z->Rx = newX;
+		// We save the new rotation coordinates for later, because if rotation is found to collide
+		// somewhere down the line, we'll have edited the first coordinates and not the rest!
+		store[i++] = newY - y;	
+		store[i++] = newX - x;
 		
+		z = z->next;
+	}
+	
+	z = plst->head; i = 0;
+	while(z) {
+		z->Ry = store[i++];
+		z->Rx = store[i++];
 		z = z->next;
 	}
 	
@@ -293,7 +303,7 @@ void gameloop(int level, int noise, int selection) {
 		
 		case 'w':
 			ERASEFROMBOARD;
-			rotation(&lst,y,x);
+			if (rotation(&lst,y,x));
 			WRITETOBOARD;
 		break;
 		
