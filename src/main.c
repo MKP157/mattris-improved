@@ -13,6 +13,8 @@
 #define WRITETOBOARD block_wprintw(board,XSCALE*x,YSCALE*y,&lst,1)
 #define CLEARREF clear();refresh()
 
+#define ALARMCANCEL ualarm(0, 0)
+
 #define XSCALE 3
 #define YSCALE 2
 
@@ -89,17 +91,14 @@ void titleloop() {
 	canvas(1,COLOR_WHITE);
 	
 	// Not included in title screen file.
-	mvprintw(13,8,"Game Type A");
-	mvprintw(15,8,"Game Type B");
 	mvprintw(1,101, "Controls  --------------");
 	mvprintw(3,101, "[W]         Rotate Block");
 	mvprintw(4,101, "[A]  Move Block Leftward");
 	mvprintw(5,101, "[S] Move Block Rightward");
 	mvprintw(6,101, "[D]  Move Block Downward");
 	mvprintw(8,101, "[Enter]            Pause");
-	mvprintw(9,101, "[E]        Quit to Title");
+	mvprintw(9,101, "[X]        Quit to Title");
 	
-	mvprintw(13,21, "(*)");
 	refresh();
 	
 	int selection = 0;
@@ -108,15 +107,19 @@ void titleloop() {
 	while (ch != 13) {
 		switch(ch) {
 			case 'w':
-				mvprintw(13,21, "(*)");
-				mvprintw(15,21, "   ");
+				mvprintw(12,2, "\\`-._");
+				mvprintw(13,2, "/.-' ");
+				mvprintw(18,2, "     ");
+				mvprintw(19,2, "     ");
 				refresh();
 				selection = 0;
 			break;
 		
 			case 's':
-				mvprintw(13,21, "   ");
-				mvprintw(15,21, "(*)");
+				mvprintw(18,2, "\\`-._");
+				mvprintw(19,2, "/.-' ");
+				mvprintw(12,2, "     ");
+				mvprintw(13,2, "     ");
 				refresh();
 				selection = 1;
 			break;
@@ -212,14 +215,39 @@ int rotation(p_block plst, int y, int x) {
 void writeBlock(p_block plst) {
 	p_chunk z = plst->head;
 	while(z) {
-		arr[y + z->Ry][x + z->Rx]++;
+		arr[y + z->Ry][x + z->Rx] = 1;
+		checkLine(y + z->Ry);
+		
 		z = z->next;
 	}
 }
 
+int checkLine(int y){
+	
+	// If any position in the array's row is equal to 0, the line is not filled, and will not clear it.
+	for (int i = 0; i < 10; i++) {
+		if (!arr[y][i])
+			return 0;
+	}
+	
+	// If all positions are 1, the line will clear.
+	clearLine(y);
+	return 1;
+}
+
+int clearLine(int y) {
+	for(int i = y; i > 0; i--) {
+		for (int j = 0; j < 10; j++) {
+			arr[i][j] = arr[i-1][j];
+		}
+	}
+	
+	generateNoise(10,1);
+}
+
 // Originally intended for generating board noise for type B games,
 // however this function also doubles as a board-redraw for the pause
-// menu. That's that the "skip" boolean condition is for; it skips
+// menu. That's what the "skip" boolean condition is for; it skips
 // randomly populating the board for when all that's needed is a skip.
 
 void generateNoise(int n, int skip) {
@@ -241,6 +269,8 @@ void generateNoise(int n, int skip) {
 
 
 void sighandler(int signum) {
+	ALARMCANCEL;
+	
 	if (collision('s', &lst, y, x)) {
 		ERASEFROMBOARD;
 		y++;
@@ -251,10 +281,9 @@ void sighandler(int signum) {
 	}
 	
 	else {
-		x = 3;
-		y = 0;
-		
 		writeBlock(&lst);
+		checkLines
+		x = 3; y = 0;
 		
 		pullBlock(&lst);
 		layeredRefresh(1);
@@ -263,34 +292,17 @@ void sighandler(int signum) {
 }
 
 void gameloop(int level, int noise, int selection) {
-	//blockGen();
-	//blockToPlay();
-	
 	gameWindowInit();
-	
-	
 	x = 0, y = 0;
 	
-	// Type A and Type B differentiate here. ----------------
-	// Type A = 0
-		canvas(4 + selection,COLOR_BLUE);
-		if (!selection) {
-			canvas(4 + selection,COLOR_BLUE);
-			eraseBoard();
-			layeredRefresh(3);
-			// Unpause animation doubles as a starting animation
-			gameunpause();
-		}
-	// Type B = 0
-		else {
-			canvas(4 + selection,COLOR_GREEN);
-			eraseBoard();
-			layeredRefresh(3);
-			gameunpause();
-			generateNoise(noise, 0);
-		}
-	// ------------------------------------------------------
+	canvas(4 + selection,COLOR_BLUE - (selection*2));
+	eraseBoard();
+	layeredRefresh(3);
+	gameunpause();
 	
+	if (selection)
+		generateNoise(noise, 0);
+		
 	// Starting position
 	// Coordinates work as follows: x or y = (board array pos)*(scale)
 	x = 3;
@@ -319,14 +331,7 @@ void gameloop(int level, int noise, int selection) {
 		break;
 		
 		case 's':
-			sighandler(SIGALRM);
-			/*
-			if (collision(ch, &lst, y, x)) {
-				ERASEFROMBOARD;
-				y++;
-				WRITETOBOARD;
-			}
-			*/
+			sighandler(SIGALRM);	// Trigger the alarm before it's supposed to sound
 		break;
 		
 		case 'd':
@@ -338,11 +343,15 @@ void gameloop(int level, int noise, int selection) {
 		break;
 		
 		case 13:
-			ualarm(0, 0);	// Cancel alarm
+			ALARMCANCEL;
+			
+			// Call the pause function, and upon return from its loop, play the unpause animation
 			gamepause();
 			gameunpause();
+			
 			WRITETOBOARD;
 			layeredRefresh(3);
+			ualarm((useconds_t)(999999), 0);
 		break;
 		
 		default: break;
@@ -361,10 +370,8 @@ void gameloop(int level, int noise, int selection) {
 		ch = getchar();
 	}
 	
-	
 	titleloop();
 }
-
 
 void main() {
 	// Required Inits, in order: curses, Rembrandt, random number generation current block and block in queue
