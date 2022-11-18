@@ -227,10 +227,10 @@ void noise_wprintw(WINDOW *win, int y, int x) {
 	int randomColour = rand() % 7 + 1;
 	
 	wattron(win, COLOR_PAIR(randomColour));
-		wmove(win, y*YSCALE, x*XSCALE);
-		WINDRAWCHECKERROW;
-		wmove(win, y*YSCALE+1, x*XSCALE);
-		WINDRAWCHECKERROW;
+	wmove(win, y*YSCALE, x*XSCALE);
+	WINDRAWCHECKERROW;
+	wmove(win, y*YSCALE+1, x*XSCALE);
+	WINDRAWCHECKERROW;
 	wattroff(win, COLOR_PAIR(randomColour));
 }
 

@@ -18,6 +18,7 @@
 
 block lst;
 int arr[20][10] = {0};
+int x = 0, y = 0;
 
 void menuloop(int selection) { 
 	canvas(selection + 2, COLOR_BLUE - selection*2);
@@ -208,6 +209,14 @@ int rotation(p_block plst, int y, int x) {
 	return 1;
 }
 
+void writeBlock(p_block plst) {
+	p_chunk z = plst->head;
+	while(z) {
+		arr[y + z->Ry][x + z->Rx]++;
+		z = z->next;
+	}
+}
+
 // Originally intended for generating board noise for type B games,
 // however this function also doubles as a board-redraw for the pause
 // menu. That's that the "skip" boolean condition is for; it skips
@@ -232,32 +241,25 @@ void generateNoise(int n, int skip) {
 
 
 void sighandler(int signum) {
-	
-	/*if (CHECK_COLLISION(3)) { // default case for collision detection
-		BLOCK_DRAW(0);
-		ANCHOR_Y = ANCHOR_Y + 1;
-		BLOCK_DRAW(1);
+	if (collision('s', &lst, y, x)) {
+		ERASEFROMBOARD;
+		y++;
+		WRITETOBOARD;
+		layeredRefresh(1);
 		
-		ualarm((useconds_t)(USER_LEVEL * 100000), 0);
-		
-		DEBUG();
-		move(ANCHOR_Y, ANCHOR_X);
+		ualarm((useconds_t)(999999), 0);
 	}
+	
 	else {
-		BLOCK_WRITE();
-		BLOCK_PULL();
+		x = 3;
+		y = 0;
 		
-		ANCHOR_X = 4;
-		ANCHOR_Y = 0;
+		writeBlock(&lst);
 		
-		BLOCK_DRAW(1);
-		refresh();
-		
-		DEBUG();
-		sighandler(SIGALRM);
+		pullBlock(&lst);
+		layeredRefresh(1);
+		ualarm((useconds_t)(999999), 0);
 	}
-	
-	refresh();*/
 }
 
 void gameloop(int level, int noise, int selection) {
@@ -266,7 +268,8 @@ void gameloop(int level, int noise, int selection) {
 	
 	gameWindowInit();
 	
-	int x = 0, y = 0;
+	
+	x = 0, y = 0;
 	
 	// Type A and Type B differentiate here. ----------------
 	// Type A = 0
@@ -290,11 +293,11 @@ void gameloop(int level, int noise, int selection) {
 	
 	// Starting position
 	// Coordinates work as follows: x or y = (board array pos)*(scale)
-	x = 5;
+	x = 3;
 	y = 0;
 	WRITETOBOARD;
 	signal(SIGALRM,sighandler); // Register signal handler
-	ualarm((useconds_t)(1000000 / level), 0);
+	ualarm((useconds_t)(999999), 0);
 	
 	char ch = 'e';
 	
@@ -316,11 +319,14 @@ void gameloop(int level, int noise, int selection) {
 		break;
 		
 		case 's':
+			sighandler(SIGALRM);
+			/*
 			if (collision(ch, &lst, y, x)) {
 				ERASEFROMBOARD;
 				y++;
 				WRITETOBOARD;
 			}
+			*/
 		break;
 		
 		case 'd':
