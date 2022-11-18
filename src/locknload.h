@@ -17,10 +17,10 @@ int loadBlockData(int block) {
 		printf("Bad block file!");
 		exit(1);
 	}
-     	
-     	while (fgets(line, B_DATALEN, load)) {	
-     		temp = atoi(line);
-     		if ((temp / 100000000) == block) break;
+	 	
+	while (fgets(line, B_DATALEN, load)) {	
+	 		temp = atoi(line);
+	 		if ((temp / 100000000) == block) break;
 	}
 	
 	fclose(load);
@@ -44,22 +44,22 @@ void pullBlock(p_block plst) {
 	}
 }
 
-int blockToBin(p_block plst) {
+/*int blockToBin(p_block plst) {
 	FILE *outfile;
 	
 	// open file for writing
 	outfile = fopen ("person.dat", "w");
 	if (outfile == NULL)
 	{
- 	       fprintf(stderr, "\nError opening file\n");
+ 		   fprintf(stderr, "\nError opening file\n");
 		exit (1);
 	}
 	
 	// write struct to file
 	fwrite (&input1, sizeof(struct p_block), 1, outfile);
- 	    
+ 		
 	if(fwrite != 0)
- 	       printf("contents to file written successfully !\n");
+ 		   printf("contents to file written successfully !\n");
 	else
 		printf("error writing file !\n");
 	 
@@ -67,4 +67,4 @@ int blockToBin(p_block plst) {
 	fclose (outfile);
  
 	return 0;
-}
+}*/

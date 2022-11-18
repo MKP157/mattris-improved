@@ -170,15 +170,8 @@ int collision(char dir, p_block plst, int y, int x) {
 }
 
 int rotation(p_block plst, int y, int x) {
-	// New temporary block 'r'; initialize as a copy of main block
-	block r;
-	block_init(&r);
-	r = *plst;
-	block_clone(plst,&r);
-	
-	int tempX, tempY;
-	
-	p_chunk z = (r.head);
+	p_chunk z = plst->head;
+	int tempY, tempX, newY, newX;
 	
 	if (z->k == 3) return 0;
 		// [!] O blocks don't need rotation!
@@ -187,18 +180,20 @@ int rotation(p_block plst, int y, int x) {
 		// Clockwise 90deg: (x,y) -> (y,-x), or (y,x) -> (-x,y)
 		
 		// Center Rx=1,Ry=1 as origin:
-		tempY = z->Ry - 1;	
+		tempY = z->Ry - 1;
 		tempX = z->Rx - 1;
 		
-		z->Ry = (-1)*tempX + 1;
-		z->Rx = tempY + 1;
+		newY = (-1)*tempX + 1;
+		newX = tempY + 1;
+		
+		if ((x + newX) < 0 || (x + newX) > 9) return 0;
+		if ((y + newY) < 0 || (y + newY) > 19) return 0;
+		
+		z->Ry = newY;
+		z->Rx = newX;
 		
 		z = z->next;
 	}
-	
-	if (!collision('w',&r,y,x)) return 0;
-		
-	*plst = r;
 	
 	return 1;
 }

@@ -7,25 +7,25 @@
 
 // Definitions ------------------------------------------
 typedef struct __chunk{
-    int k;	// Block key (also determines colour)
-    		// 1 : T
-    		// 2 : I
-    		// 3 : O
-    		// 4 : J
-    		// 5 : L
-    		// 6 : S
-    		// 7 : Z
-    int Rx;	// Placement in block structure, relative to the anchor's x.
-    int Ry;	// Placement in block structure, relative to the anchor's y.
-    
-    struct __chunk *next;
-    struct __chunk *prev;
+	int k;	// Block key (also determines colour)
+			// 1 : T
+			// 2 : I
+			// 3 : O
+			// 4 : J
+			// 5 : L
+			// 6 : S
+			// 7 : Z
+	int Rx;	// Placement in block structure, relative to the anchor's x.
+	int Ry;	// Placement in block structure, relative to the anchor's y.
+	
+	struct __chunk *next;
+	struct __chunk *prev;
 } chunk;
 
 typedef chunk* p_chunk;
 
 typedef struct {
-    p_chunk head;
+	p_chunk head;
 } block;
 
 typedef block* p_block;

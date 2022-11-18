@@ -40,11 +40,20 @@ WINDOW *stats, *next, *frame, *board;
 void rembrandtInit() {
 	
 	if ((has_colors() == FALSE) || (can_change_color() == FALSE)) {
-                endwin();
+            endwin();
       		printf("[!] Mattris requires a terminal with changeable colours.\n");
        		exit(1);
-    	}
+    }
+	
 	start_color();
+	
+	// Custom colour definitions, because I quite honestly despise the default GNOME terminal colours.
+	// These are much more vibrant, and sourced from https://www.december.com/html/spec/colorper.html.
+	init_color(COLOR_RED, 990,80,0);			// Raspberry
+	init_color(COLOR_GREEN, 0,1000,0);			// Lime
+	init_color(COLOR_YELLOW, 850,850,100);		// Gold
+	init_color(COLOR_BLUE, 0,700,930);			// Sky Blue
+	init_color(COLOR_MAGENTA, 1000,0,1000);		// Fuschia
 	
 	// Initialize colour pairs as the name integer value of their 
 	// respective colours, for simplicity. COLOR_<type> ( BLUE, RED, etc)
