@@ -75,10 +75,17 @@ void block_destroy(p_block plst) {
 	}
 }
 
-void block_clone(p_block plst, p_block plst2) {
-	p_chunk z = plst->head;
+void block_clone(p_block plst,		// from
+		 p_block plst2) {	// to
+	
+	if (plst2 != NULL) block_destroy(plst2);
+	block_init(plst2);
+	
+	p_chunk z = plst->head, x;
+	
 	while(z) {
-		block_insert(plst2,z);
+		x = block_newChunk(z->k,z->Ry,z->Rx);
+		block_insert(plst2,x);
 		z = z->next;
 	}
 }

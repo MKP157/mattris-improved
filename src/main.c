@@ -30,10 +30,9 @@
 #define S_BLOCK 6
 #define Z_BLOCK 7
 
-block lst;
+block lst, q_lst;
 int arr[20][10] = {0};
-int x = 0, y = 0, level, queue;
-int lineCount;
+int x = 0, y = 0, level, queue, score;
 int blockCount[7];
 
 
@@ -235,12 +234,11 @@ void writeBlock(p_block plst) {
 	while(z) {
 		arr[y + z->Ry][x + z->Rx] = z->k;
 		lines[i++] = y + z->Ry;
-		
 		z = z->next;
 	}
 	
 	for (i = 0; i < 4; i++)
-		checkLine(lines[i]);
+		if (checkLine(lines[i])) clearLine(lines[i]);
 }
 
 int checkLine(int y){
@@ -251,9 +249,8 @@ int checkLine(int y){
 			return 0;
 	}
 	
+	score += 100;
 	// If all positions are over 1, the line will clear.
-	lineCount++;
-	clearLine(y);
 	return y;
 }
 
@@ -270,8 +267,11 @@ int clearLine(int y) {
 
 
 void newBlock() {
-	queue = rand() % 6 + 1;
-	drawQueue(queue);
+	block_clone(&q_lst, &lst);
+	pullBlock(&q_lst);
+	
+	printNext(&q_lst);
+	layeredRefresh(1);
 }
 // Originally intended for generating board noise for type B games,
 // however this function also doubles as a board-redraw for the pause
@@ -318,19 +318,28 @@ void sighandler(int signum) {
 	
 	else {
 		writeBlock(&lst);
-		x = 3; y = -1;
+		x = 3; y = 0;
 		
-		pullBlock(&lst);
+		printStatUpdate(lst.head->k + 2, ++blockCount[lst.head->k - 1]);
+		
+		newBlock();
 		layeredRefresh(1);
 		ualarm(LEVELTIME, 0);
 	}
+	
+	printStatUpdate(0,score);
 }
 
 void gameloop(int level_start, int noise, int selection) {
 	gameWindowInit();
 	x = 0, y = 0;
 	level = level_start;
-	lineCount = 0;
+	
+	if (level_start > 1)
+		score += level_start * 1000;
+	
+	pullBlock(&q_lst);
+	newBlock();
 	
 	canvas(4 + selection,COLOR_BLUE - (selection*2));
 	eraseBoard();
@@ -338,7 +347,12 @@ void gameloop(int level_start, int noise, int selection) {
 	gameunpause();
 	
 	// Only generate noise if level type is type B
-	if (selection) directDraw(noise, 0);
+	if (selection) {
+		for (int i = 19; i >= 0; i--)
+			if (checkLine(i)) 
+				clearLine(i);
+	}
+	directDraw(noise, 0);
 		
 	// Starting position
 	// Coordinates work as follows: x or y = (board array pos)*(scale)
@@ -347,6 +361,9 @@ void gameloop(int level_start, int noise, int selection) {
 	WRITETOBOARD;
 	signal(SIGALRM,sighandler); // Register signal handler
 	ualarm(LEVELTIME, 0);
+	
+	printStatUpdate(0,score);
+	printStatUpdate(1,level);
 	
 	char ch = 'e';
 	
@@ -368,6 +385,7 @@ void gameloop(int level_start, int noise, int selection) {
 		break;
 		
 		case 's':
+			score += 10;
 			sighandler(SIGALRM);	// Trigger the alarm before it's supposed to sound
 		break;
 		
@@ -391,7 +409,10 @@ void gameloop(int level_start, int noise, int selection) {
 			ualarm(LEVELTIME, 0);
 		break;
 		
-		default: break;
+		default: 
+			ERASEFROMBOARD;
+			WRITETOBOARD;
+		break;
 		}
 		
 		for (int i = 0; i < 20; i++) {

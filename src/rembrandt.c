@@ -15,7 +15,7 @@
 // but rather a reminder to myself when making the ASCII graphics.
 #define MAXLEN 99	
 #define MAXHEIGHT 51
-#define WINDRAWCHECKERROW waddch(win, ACS_CKBOARD); waddch(win, ACS_CKBOARD); waddch(win, ACS_CKBOARD)
+#define WINDRAWCHECKERROW waddch(win, ACS_CKBOARD); waddch(win, ACS_CKBOARD); waddch(win, ACS_CKBOARD);
 // --------------------------------------------------------------------------------------
 
 
@@ -49,10 +49,10 @@ void rembrandtInit() {
 	
 	// Custom colour definitions, because I quite honestly despise the default GNOME terminal colours.
 	// These are much more vibrant, and sourced from https://www.december.com/html/spec/colorper.html.
-	init_color(COLOR_RED, 990,80,0);			// Raspberry
-	init_color(COLOR_GREEN, 0,1000,0);			// Lime
+	init_color(COLOR_RED, 990,80,0);		// Raspberry
+	init_color(COLOR_GREEN, 0,1000,0);		// Lime
 	init_color(COLOR_YELLOW, 850,850,100);		// Gold
-	init_color(COLOR_BLUE, 0,700,930);			// Sky Blue
+	init_color(COLOR_BLUE, 0,700,930);		// Sky Blue
 	init_color(COLOR_MAGENTA, 1000,0,1000);		// Fuschia
 	
 	// Initialize colour pairs as the name integer value of their 
@@ -70,17 +70,28 @@ void rembrandtInit() {
 // Create and format the window for the main game ----------------------------------------
 void gameWindowInit(){
 	//  next ------------------------------------
-	next = newwin(6,24,4,44);
+	next = newwin(6,16,4,44);
 	wborder(next,0,0,0,0,0,0,0,0);
-	mvwprintw(next,2,2,"Next up:");
+	mvwprintw(next,0,2,"+ Next Up +");
 	overwrite(next, stdscr);
 	// ------------------------------------------
 	
 	
 	// statistics -------------------------------
-	stats = newwin(6,24,13,44);
+	stats = newwin(28,24,13,44);
 	wborder(stats,0,0,0,0,0,0,0,0);
-		
+	mvwprintw(stats,0,2,"+ Statistics +");
+	mvwprintw(stats,2,1,"=+ Score +============");
+	mvwprintw(stats,6,1,"=+ Difficulty +=======");
+	mvwprintw(stats,10,1,"=+ Blocks Seen +======");
+	mvwprintw(stats,12,2,"T Blocks : x");
+	mvwprintw(stats,14,2,"I Blocks : x");
+	mvwprintw(stats,16,2,"O Blocks : x");
+	mvwprintw(stats,18,2,"J Blocks : x");
+	mvwprintw(stats,20,2,"L Blocks : x");
+	mvwprintw(stats,22,2,"S Blocks : x");
+	mvwprintw(stats,24,2,"Z Blocks : x");
+	
 	overwrite(stats, stdscr);
 	// ------------------------------------------
 	
@@ -168,30 +179,6 @@ int canvas(int x, int colour) {
 }
 // --------------------------------------------------------------------------------------
 
-void bmove(int Y, int X) {
-	move((Y-1)*2,(X-1)*3);
-}
-
-/*void block_printw(int origX, int origY, p_block plst, int x) {
-	p_chunk z = plst->head;
-	while(z) {
-		move((int)(origY + z->Ry*2), (int)(origX + z->Rx*3));
-		//printw("%d", z->k);
-		
-		
-		if (x)  {
-			addch(ACS_CKBOARD);addch(ACS_CKBOARD);addch(ACS_CKBOARD);
-			move((int)(origY + z->Ry*2 + 1), (int)(origX + z->Rx*3));
-			addch(ACS_CKBOARD);addch(ACS_CKBOARD);addch(ACS_CKBOARD);
-		}
-		else {
-			printw("   ");
-			move((int)(origY + z->Ry*2 + 1), (int)(origX + z->Rx*3));
-			printw("  .");
-		}
-		z = z->next;
-	}
-}*/
 
 void block_wprintw(WINDOW *win, int origX, int origY, p_block plst, int x) {
 	p_chunk z = plst->head;
@@ -239,6 +226,32 @@ void eraseBoard() {
 		}
 	}
 	wattroff(board, COLOR_PAIR(COLOR_WHITE));
+}
+
+void printNext(p_block plst) {
+	int i = 2;
+		mvwprintw(next, i++, 2, "        ");
+		mvwprintw(next, i++, 2, "        ");
+		mvwprintw(next, i++, 2, "        ");
+		
+	p_chunk z = plst->head;
+	while(z) {
+		wattron(next, COLOR_PAIR(z->k));
+		mvwaddch(next,1 + z->Rx,4 + z->Ry,ACS_CKBOARD);
+		wattroff(next, COLOR_PAIR(z->k));
+		z = z->next;
+	}
+}
+
+void printStatUpdate(int choice, int value) {
+	if (choice > 2)		// Block Stats
+		mvwprintw(stats, 12 + (choice-3) * 2, 16, "%6d", value);
+	else if (choice)	// Level
+		mvwprintw(stats, 8, 2, "Level %d", value);
+	else 			// Score
+		mvwprintw(stats, 4, 2, "%010d Points", value);
+		
+	layeredRefresh(1);
 }
 
 // Some defines specific to the pause system --------------------------------------------
