@@ -32,7 +32,7 @@
 
 block lst, q_lst;
 int arr[20][10] = {0};
-int x = 0, y = 0, level, queue, score;
+int x = 0, y = 0, level, queue, score, lineCount = 0;
 int blockCount[7];
 
 
@@ -229,16 +229,18 @@ int rotation(p_block plst, int y, int x) {
 
 void writeBlock(p_block plst) {
 	p_chunk z = plst->head;
-	int lines[4], i = 0;
+	int lines[20] = {0}, i = 0;
 	
 	while(z) {
 		arr[y + z->Ry][x + z->Rx] = z->k;
-		lines[i++] = y + z->Ry;
+		lines[y + z->Ry]++;
 		z = z->next;
 	}
-	
-	for (i = 0; i < 4; i++)
-		if (checkLine(lines[i])) clearLine(lines[i]);
+	for (i = 0; i < 20; i++) {
+		if (lines[i] && checkLine(i)) {
+			clearLine(i);
+		}
+	}
 }
 
 int checkLine(int y){
@@ -249,6 +251,7 @@ int checkLine(int y){
 			return 0;
 	}
 	
+	lineCount++;
 	score += 100;
 	// If all positions are over 1, the line will clear.
 	return y;
@@ -272,6 +275,17 @@ void newBlock() {
 	
 	printNext(&q_lst);
 	layeredRefresh(1);
+}
+
+int blockOutCheck(p_block plst) {
+	p_chunk z = plst->head;
+	
+	while(z) {
+		if(arr[y + z->Ry][x + z->Rx]) return 1;
+		z = z->next;
+	}
+	
+	return 0;
 }
 // Originally intended for generating board noise for type B games,
 // however this function also doubles as a board-redraw for the pause
@@ -323,8 +337,13 @@ void sighandler(int signum) {
 		printStatUpdate(lst.head->k + 2, ++blockCount[lst.head->k - 1]);
 		
 		newBlock();
+		WRITETOBOARD;
 		layeredRefresh(1);
-		ualarm(LEVELTIME, 0);
+		
+		if (blockOutCheck(&lst)) 
+			blockOut();
+		else
+			ualarm(LEVELTIME, 0);
 	}
 	
 	printStatUpdate(0,score);

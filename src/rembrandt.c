@@ -131,8 +131,11 @@ void layeredRefresh(int layers) {
 // 	bottom 3 : stdscr
 
 	if (layers >= 3) { wnoutrefresh(stdscr); }
-	if (layers >= 2) { wnoutrefresh(next); wnoutrefresh(stats); wnoutrefresh(frame); }
-	if (layers) { wnoutrefresh(board); }
+	if (layers >= 2) { 
+		overwrite(next, stdscr); overwrite(stats, stdscr); overwrite(frame, stdscr);
+		wnoutrefresh(next); wnoutrefresh(stats); wnoutrefresh(frame); 
+	}
+	if (layers) { overwrite(board, frame); wnoutrefresh(board); }
 	
 	doupdate();
 	// Uses only one doupdate(), as per the documentation.
@@ -158,6 +161,9 @@ int canvas(int x, int colour) {
 		case 4: load = fopen("./graphics/bg.txt", "r"); break;
 	// Type B background
 		case 5: load = fopen("./graphics/bg2.txt", "r"); break;
+		
+		case 6: load = fopen("./graphics/blockOut.txt", "r"); break;
+		
 		default: break;
 	}
 	
@@ -254,10 +260,64 @@ void printStatUpdate(int choice, int value) {
 	layeredRefresh(1);
 }
 
+
+// Block Out ----------------------------------------------------------------------------
+
+void blockOut() {
+	wclear(stdscr);
+	wclear(stats);
+	wclear(next);
+	layeredRefresh(1);
+	
+	usleep(1000000*1.5);
+	
+	for (int i = 0; i < 20*2; i++) {
+		wclear(stdscr);
+		mvwin(frame, 4, 4 + i*2);
+		mvwin(board, 5, 5 + i*2);
+		layeredRefresh(3);
+		usleep(1000000/50);
+	}
+	
+	usleep(1000000/50);
+	
+	canvas(6, 0);
+	refresh();
+	layeredRefresh(1);
+}
+// --------------------------------------------------------------------------------------
+
+
 // Some defines specific to the pause system --------------------------------------------
 #define BOARDREF wrefresh(board);
 #define BOARD_U_SL_REF  BOARDREF; usleep(100000);
 #define BOARD_SL_REF  BOARDREF; sleep(1);
+// --------------------------------------------------------------------------------------
+
+// Level-up animation -------------------------------------------------------------------
+void levelUp() {
+	int temp;
+	temp = rand() % 6;
+	
+	for (int i = 0; i < 3; i++) {
+		attron(COLOR_PAIR(temp));
+		mvprintw(0,2,"  _    _____   _____ _      _   _ ___ ");
+		mvprintw(1,2," | |  | __\\ \\ / / __| |    | | | | _ \\");
+		mvprintw(2,2," | |__| _| \\ V /| _|| |__  | |_| |  _/");
+		mvprintw(3,2," |____|___| \\_/ |___|____|  \\___/|_|  ");
+		 
+		attroff(COLOR_PAIR(temp));
+		layeredRefresh(3);
+	 	usleep(1000000/8);
+	 	
+		for (int j = 0;j<4;)
+			mvprintw(j++,2,"                                        ");
+		
+		layeredRefresh(3);
+	 	usleep(1000000/8);
+	 	
+	}
+}
 // --------------------------------------------------------------------------------------
 
 // Game-pause menu ----------------------------------------------------------------------
