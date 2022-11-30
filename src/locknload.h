@@ -2,9 +2,16 @@
 #include <stdlib.h>
 
 #include "blockstruct.h"
+#include "scorestruct.h"
+
+#pragma once
+#ifndef LOAD_H
+#define LOAD_H
 
 // Length of block data: <blocktype,y,x,y,x,y,x,y,x> = 8 integers
 #define B_DATALEN 10
+#define SC_NAME_DATALEN 10
+#define SC_VALU_DATALEN 11
 
 int loadBlockData(int block) {
 	FILE *load;
@@ -45,27 +52,72 @@ void pullBlock(p_block plst) {
 		block_insert(plst, x);
 	}
 }
-/*int blockToBin(p_block plst) {
-	FILE *outfile;
+
+
+void loadScoreData(p_rankList plst) {
+	FILE *loadScore;
 	
-	// open file for writing
-	outfile = fopen ("person.dat", "w");
-	if (outfile == NULL)
-	{
- 		   fprintf(stderr, "\nError opening file\n");
-		exit (1);
+	int temp;
+	char n1,n2,n3;
+	int len;
+	
+	loadScore = fopen("./bindata/scoredata.txt", "r");
+	
+	if (loadScore == NULL) {
+		printf("Bad score files!");
+		exit(1);
 	}
 	
-	// write struct to file
-	fwrite (&input1, sizeof(struct p_block), 1, outfile);
- 		
-	if(fwrite != 0)
- 		   printf("contents to file written successfully !\n");
-	else
-		printf("error writing file !\n");
-	 
-	// close file
-	fclose (outfile);
- 
-	return 0;
+	p_rank x;
+	for (int i = 1; i < len; i++) {
+		fscanf(loadScore, "%c", &n1);
+		fscanf(loadScore, "%c", &n2);
+		fscanf(loadScore, "%c", &n3);
+		
+   		fscanf(loadScore, "%d", &temp);
+   		
+   		x = rankList_newRank(n1,n2,n3,temp);
+		rankList_insert(plst, x);
+		
+		// garbage collection, don't touch
+		fscanf(loadScore, "%d", &temp);
+	}
+	
+	fclose(loadScore);
+}
+
+/*void saveScoreData(p_rankList plst) {
+	FILE *loadScore;
+	
+	int temp;
+	char n1,n2,n3;
+	int len;
+	
+	loadScore = fopen("./bindata/scoredata.txt", "w");
+	
+	if (loadScore == NULL) {
+		printf("Bad score files!");
+		exit(1);
+	}
+	
+	fprintf(loadScore, "%d", &len);
+	
+	p_rank x;
+	for (int i = 0; i < 5; i++) {
+		fscanf(loadScore, "%c", &n1);
+		fscanf(loadScore, "%c", &n2);
+		fscanf(loadScore, "%c", &n3);
+		
+   		fscanf(loadScore, "%d", &temp);
+   		
+   		x = rankList_newRank(n1,n2,n3,temp);
+		rankList_insert(plst, x);
+		
+		fscanf(loadScore, "%d", &temp);
+	}
+	
+	fclose(loadScore);
 }*/
+
+#endif
+

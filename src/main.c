@@ -307,10 +307,12 @@ void directDraw(int n, int skip) {
 			}
 			
 			if (arr[i][j]) {
-				noise_wprintw(board,i,j,arr[i][j]);
-				
+				if (skip == 3)
+					noise_wprintw(board,i,j,1);
+				else
+					noise_wprintw(board,i,j,arr[i][j]);
 				// Debug:
-				mvprintw(i,j+100,"%d",arr[i][j]);
+				//mvprintw(i,j+100,"%d",arr[i][j]);
 			}
 		}
 	}

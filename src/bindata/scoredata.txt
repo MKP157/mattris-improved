@@ -1,0 +1,5 @@
+MKP 8
+ADF 4
+AMA 1
+JBQ 6
+AGR 115

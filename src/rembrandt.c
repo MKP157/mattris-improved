@@ -264,26 +264,32 @@ void printStatUpdate(int choice, int value) {
 // Block Out ----------------------------------------------------------------------------
 
 void blockOut() {
-	wclear(stdscr);
 	wclear(stats);
 	wclear(next);
-	layeredRefresh(1);
+	directDraw(10, 3);
+	wrefresh(frame);
+	wrefresh(board);
 	
 	usleep(1000000*1.5);
 	
-	for (int i = 0; i < 20*2; i++) {
-		wclear(stdscr);
+	for (int i = 0; i < 40; i++) {
+		clear();
 		mvwin(frame, 4, 4 + i*2);
 		mvwin(board, 5, 5 + i*2);
-		layeredRefresh(3);
+		refresh();
+		wrefresh(frame);
+		wrefresh(board);
 		usleep(1000000/50);
 	}
 	
 	usleep(1000000/50);
-	
 	canvas(6, 0);
+	overlay(frame, stdscr);
 	refresh();
-	layeredRefresh(1);
+	wrefresh(frame);
+	wrefresh(board);
+	sleep(10);
+	titleloop();
 }
 // --------------------------------------------------------------------------------------
 
