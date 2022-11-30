@@ -28,11 +28,11 @@ int loadBlockData(int block) {
 	return temp;
 }
 
-void pullBlock(p_block plst) {
+void pullBlock(p_block plst, int q) {
 	if (plst != NULL) block_destroy(plst);
 	
 	p_chunk x;
-	int data = loadBlockData(rand() % 6 + 1);
+	int data = q;
 		// Load a random block from the data file
 	
 	int k = data / 100000000, Ry, Rx;
@@ -45,7 +45,6 @@ void pullBlock(p_block plst) {
 		block_insert(plst, x);
 	}
 }
-
 /*int blockToBin(p_block plst) {
 	FILE *outfile;
 	

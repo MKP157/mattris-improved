@@ -43,7 +43,7 @@ void rembrandtInit() {
             endwin();
       		printf("[!] Mattris requires a terminal with changeable colours.\n");
        		exit(1);
-    }
+    	}
 	
 	start_color();
 	
@@ -198,8 +198,6 @@ void block_wprintw(WINDOW *win, int origX, int origY, p_block plst, int x) {
 	while(z) {
 		wmove(win, (int)(origY + z->Ry*2), (int)(origX + z->Rx*3));
 		//printw("%d", z->k);
-		
-		
 		if (x)  {
 			wattron(win, COLOR_PAIR(z->k));
 				// Change colour to that stored in block
@@ -223,15 +221,13 @@ void block_wprintw(WINDOW *win, int origX, int origY, p_block plst, int x) {
 	}
 }
 
-void noise_wprintw(WINDOW *win, int y, int x) {
-	int randomColour = rand() % 7 + 1;
-	
-	wattron(win, COLOR_PAIR(randomColour));
+void noise_wprintw(WINDOW *win, int y, int x, int color) {
+	wattron(win, COLOR_PAIR(color));
 	wmove(win, y*YSCALE, x*XSCALE);
 	WINDRAWCHECKERROW;
 	wmove(win, y*YSCALE+1, x*XSCALE);
 	WINDRAWCHECKERROW;
-	wattroff(win, COLOR_PAIR(randomColour));
+	wattroff(win, COLOR_PAIR(color));
 }
 
 void eraseBoard() {
@@ -331,9 +327,8 @@ void gameunpause() {
 		
 		BOARD_U_SL_REF;
 	}
-	generateNoise(10,1);
+	directDraw(10,1);
 	layeredRefresh(3);
 }
 // ------------------------------------------------------
-
 

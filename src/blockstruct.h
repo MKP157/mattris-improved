@@ -8,13 +8,13 @@
 // Definitions ------------------------------------------
 typedef struct __chunk{
 	int k;	// Block key (also determines colour)
-			// 1 : T
-			// 2 : I
-			// 3 : O
-			// 4 : J
-			// 5 : L
-			// 6 : S
-			// 7 : Z
+			// 1 : T	T_BLOCK 1
+			// 2 : I	I_BLOCK 2
+			// 3 : O	O_BLOCK 3
+			// 4 : J	J_BLOCK 4
+			// 5 : L	L_BLOCK 5
+			// 6 : S	S_BLOCK 6
+			// 7 : Z	Z_BLOCK 7
 	int Rx;	// Placement in block structure, relative to the anchor's x.
 	int Ry;	// Placement in block structure, relative to the anchor's y.
 	

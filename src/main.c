@@ -5,6 +5,8 @@
 #include <signal.h>
 #include <time.h>
 
+#include "./bass/bass.h"
+
 #include "blockstruct.h"
 #include "rembrandt.c"
 //#include "locknload.h"
@@ -15,12 +17,25 @@
 
 #define ALARMCANCEL ualarm(0, 0)
 
+#define LEVELTIME (useconds_t)(999999/level)
+
 #define XSCALE 3
 #define YSCALE 2
 
+#define T_BLOCK 1
+#define I_BLOCK 2
+#define O_BLOCK 3
+#define J_BLOCK 4
+#define L_BLOCK 5
+#define S_BLOCK 6
+#define Z_BLOCK 7
+
 block lst;
 int arr[20][10] = {0};
-int x = 0, y = 0;
+int x = 0, y = 0, level, queue;
+int lineCount;
+int blockCount[7];
+
 
 void menuloop(int selection) { 
 	canvas(selection + 2, COLOR_BLUE - selection*2);
@@ -82,7 +97,7 @@ void menuloop(int selection) {
 	
 	CLEARREF;
 	
-	if (ch == 'e') { titleloop(); }
+	if (ch == 'x') { titleloop(); }
 	
 	else { gameloop(++levelSelection, ++noiseSelection, selection); }	
 }
@@ -202,6 +217,7 @@ int rotation(p_block plst, int y, int x) {
 		z = z->next;
 	}
 	
+	// Only write the new data to the block if the collision tests are passed
 	z = plst->head; i = 0;
 	while(z) {
 		z->Ry = store[i++];
@@ -214,12 +230,17 @@ int rotation(p_block plst, int y, int x) {
 
 void writeBlock(p_block plst) {
 	p_chunk z = plst->head;
+	int lines[4], i = 0;
+	
 	while(z) {
-		arr[y + z->Ry][x + z->Rx] = 1;
-		checkLine(y + z->Ry);
+		arr[y + z->Ry][x + z->Rx] = z->k;
+		lines[i++] = y + z->Ry;
 		
 		z = z->next;
 	}
+	
+	for (i = 0; i < 4; i++)
+		checkLine(lines[i]);
 }
 
 int checkLine(int y){
@@ -230,9 +251,10 @@ int checkLine(int y){
 			return 0;
 	}
 	
-	// If all positions are 1, the line will clear.
+	// If all positions are over 1, the line will clear.
+	lineCount++;
 	clearLine(y);
-	return 1;
+	return y;
 }
 
 int clearLine(int y) {
@@ -242,22 +264,36 @@ int clearLine(int y) {
 		}
 	}
 	
-	generateNoise(10,1);
+	eraseBoard();
+	directDraw(10, 1);
 }
 
+
+void newBlock() {
+	queue = rand() % 6 + 1;
+	drawQueue(queue);
+}
 // Originally intended for generating board noise for type B games,
 // however this function also doubles as a board-redraw for the pause
 // menu. That's what the "skip" boolean condition is for; it skips
 // randomly populating the board for when all that's needed is a skip.
 
-void generateNoise(int n, int skip) {
+void directDraw(int n, int skip) {
 	//printf("Generating noise!");
-	for (int i = 19; i > 20-(n*2); i--) {
+	int R;
+	
+	for (int i = 19; i >= 20-(n*2); i--) {
 		for (int j = 0; j < 10; j++) {
-			if (!skip) arr[i][j] = rand() & 1;
+			
+			// If the skip flag = 0; then the function proceeds to generate board noise. This is used for type B games
+			if (!skip) {
+				R = (rand() % 7);
+				if (rand() & 2)
+					arr[i][j] = R;
+			}
 			
 			if (arr[i][j]) {
-				noise_wprintw(board,i,j);
+				noise_wprintw(board,i,j,arr[i][j]);
 				
 				// Debug:
 				mvprintw(i,j+100,"%d",arr[i][j]);
@@ -277,31 +313,32 @@ void sighandler(int signum) {
 		WRITETOBOARD;
 		layeredRefresh(1);
 		
-		ualarm((useconds_t)(999999), 0);
+		ualarm(LEVELTIME, 0);
 	}
 	
 	else {
 		writeBlock(&lst);
-		checkLines
-		x = 3; y = 0;
+		x = 3; y = -1;
 		
 		pullBlock(&lst);
 		layeredRefresh(1);
-		ualarm((useconds_t)(999999), 0);
+		ualarm(LEVELTIME, 0);
 	}
 }
 
-void gameloop(int level, int noise, int selection) {
+void gameloop(int level_start, int noise, int selection) {
 	gameWindowInit();
 	x = 0, y = 0;
+	level = level_start;
+	lineCount = 0;
 	
 	canvas(4 + selection,COLOR_BLUE - (selection*2));
 	eraseBoard();
 	layeredRefresh(3);
 	gameunpause();
 	
-	if (selection)
-		generateNoise(noise, 0);
+	// Only generate noise if level type is type B
+	if (selection) directDraw(noise, 0);
 		
 	// Starting position
 	// Coordinates work as follows: x or y = (board array pos)*(scale)
@@ -309,7 +346,7 @@ void gameloop(int level, int noise, int selection) {
 	y = 0;
 	WRITETOBOARD;
 	signal(SIGALRM,sighandler); // Register signal handler
-	ualarm((useconds_t)(999999), 0);
+	ualarm(LEVELTIME, 0);
 	
 	char ch = 'e';
 	
@@ -351,7 +388,7 @@ void gameloop(int level, int noise, int selection) {
 			
 			WRITETOBOARD;
 			layeredRefresh(3);
-			ualarm((useconds_t)(999999), 0);
+			ualarm(LEVELTIME, 0);
 		break;
 		
 		default: break;
@@ -389,13 +426,6 @@ void main() {
 	//////////////////// to be put in menu-nav method
 	titleloop();
 	////////////////////////
-	
-	//block_print(&lst);
-	//block_printw(&lst);
-	
-	//clear();
-	//block_destroy(&lst);
-	//block_printw(&lst);
 	
 	endwin();
 }
