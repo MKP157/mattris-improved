@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "blockstruct.h"
-#include "scorestruct.h"
+#include "./blockstruct.h"
+#include "./scorestruct.h"
 
 #pragma once
 #ifndef LOAD_H
@@ -12,7 +12,7 @@
 #define B_DATALEN 10
 #define SC_NAME_DATALEN 10
 #define SC_VALU_DATALEN 11
-
+#define OUTFILE_DATALEN 10
 int loadBlockData(int block) {
 	FILE *load;
 	char line[B_DATALEN];
@@ -58,10 +58,10 @@ void loadScoreData(p_rankList plst) {
 	FILE *loadScore;
 	
 	int temp;
-	char n1,n2,n3;
+	//char n1,n2,n3;
 	int len;
 	
-	loadScore = fopen("./bindata/scoredata.txt", "r");
+	loadScore = fopen("./bindata/scoredata_debug.txt", "r");
 	
 	if (loadScore == NULL) {
 		printf("Bad score files!");
@@ -69,14 +69,15 @@ void loadScoreData(p_rankList plst) {
 	}
 	
 	p_rank x;
-	for (int i = 1; i < len; i++) {
-		fscanf(loadScore, "%c", &n1);
-		fscanf(loadScore, "%c", &n2);
-		fscanf(loadScore, "%c", &n3);
+	for (int i = 0; i < 5; i++) {
+		//fscanf(loadScore, "%c", &n1);
+		//fscanf(loadScore, "%c", &n2);
+		//fscanf(loadScore, "%c", &n3);
 		
    		fscanf(loadScore, "%d", &temp);
    		
-   		x = rankList_newRank(n1,n2,n3,temp);
+   		//x = rankList_newRank(n1,n2,n3,temp)
+     		x = rankList_newRank(temp);
 		rankList_insert(plst, x);
 		
 		// garbage collection, don't touch
@@ -86,38 +87,42 @@ void loadScoreData(p_rankList plst) {
 	fclose(loadScore);
 }
 
-/*void saveScoreData(p_rankList plst) {
-	FILE *loadScore;
+void saveScoreData(p_rankList plst) {
+	FILE *saveScore;
 	
 	int temp;
 	char n1,n2,n3;
 	int len;
 	
-	loadScore = fopen("./bindata/scoredata.txt", "w");
+	saveScore = fopen("./bindata/scoredata_debug.txt", "w");
 	
-	if (loadScore == NULL) {
+	if (saveScore == NULL) {
 		printf("Bad score files!");
 		exit(1);
 	}
 	
-	fprintf(loadScore, "%d", &len);
-	
-	p_rank x;
-	for (int i = 0; i < 5; i++) {
-		fscanf(loadScore, "%c", &n1);
-		fscanf(loadScore, "%c", &n2);
-		fscanf(loadScore, "%c", &n3);
-		
-   		fscanf(loadScore, "%d", &temp);
-   		
-   		x = rankList_newRank(n1,n2,n3,temp);
-		rankList_insert(plst, x);
-		
-		fscanf(loadScore, "%d", &temp);
+	rankList_fprint(plst, saveScore);
+	fclose(saveScore);
+	rankList_delete(plst);
+}
+
+void rankList_fprint(p_rankList plst, FILE *out) {
+	if (plst->head != NULL) {
+		p_rank z = plst->head;
+		rank_fprint(z, out);
 	}
+}
+
+void rank_fprint(p_rank z, FILE *out) {
+	if (z->greater != NULL)
+		rank_fprint(z->greater, out);
 	
-	fclose(loadScore);
-}*/
+	//fprintf(out, "%c%c%c %010d\n", z->n1, z->n2, z->n3, z->score);
+	fprintf(out, "%010d\n", z->score);
+	
+	if (z->lesser != NULL)
+		rank_fprint(z->lesser, out);
+}
 
 #endif
 

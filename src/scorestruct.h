@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <curses.h>
 
 // Include guards
 #pragma once
@@ -7,7 +8,7 @@
 
 // Definitions ------------------------------------------
 typedef struct __rank{
-	char n1,n2,n3;
+	//char n1,n2,n3;
 	int score;
 	
 	struct __rank *greater;
@@ -26,13 +27,8 @@ typedef rankList* p_rankList;
 
 // Functions --------------------------------------------
 
-// Create a new score
-p_rank rankList_newRank(char in_n1, char in_n2, char in_n3, int in_score) {
+p_rank rankList_newRank(int in_score) {
 	p_rank z = (p_rank)malloc(sizeof(rank));
-	
-	z->n1 = in_n1;
-	z->n2 = in_n2;
-	z->n3 = in_n3;
 	
 	z->score = in_score;
 	return z;
@@ -51,7 +47,6 @@ void rank_sort(p_rank zN, p_rank zC) {
 	if (zN->score >= zC->score && ((zC->greater == NULL) || (zC->greater->score > zN->score))) {
 		zN->greater = zC->greater;
 		zC->greater = zN;
-		printf("%c%c%c's score: %010d \n", zN->n1, zN->n2, zN->n3, zN->score);
 	}
 		
 	else if  ((zN->score >= zC->score) && (zC->greater->score < zN->score))
@@ -60,14 +55,13 @@ void rank_sort(p_rank zN, p_rank zC) {
 	else if (zN->score < zC->score && ((zC->lesser == NULL) || (zC->lesser->score < zN->score))) {
 		zN->lesser = zC->lesser;
 		zC->lesser = zN;
-		printf("%c%c%c's score: %010d \n", zN->n1, zN->n2, zN->n3, zN->score);
 	}
 	
 	else
 		rank_sort(zN, zC->lesser);
 }
 
-void rankList_print(p_rankList plst) {
+/*void rankList_print(p_rankList plst) {
 	if (plst->head != NULL) {
 		p_rank z = plst->head;
 		rank_print(z);
@@ -76,15 +70,19 @@ void rankList_print(p_rankList plst) {
 	else printf("Your ranklist is empty or doesn't exist!");
 }
 
+
 void rank_print(p_rank z) {
 	if (z->greater != NULL)
 		rank_print(z->greater);
 	
-	printf("%c%c%c's score: %010d \n", z->n1, z->n2, z->n3, z->score);
+	//printf("%c%c%c's score: %010d \n", z->n1, z->n2, z->n3, z->score);
+	getchar();
+	printw("%c%c%c's score: %010d", z->n1, z->n2, z->n3, z->score);
+	getchar();
 	
 	if (z->lesser != NULL)
 		rank_print(z->lesser);
-}
+}*/
 
 void rankList_delete(p_rankList plst) {
 	if (plst->head == NULL) {

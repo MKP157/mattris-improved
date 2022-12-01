@@ -5,11 +5,11 @@
 #include <signal.h>
 #include <time.h>
 
-#include "./bass/bass.h"
 
+#include "scorestruct.h"
 #include "blockstruct.h"
 #include "rembrandt.c"
-//#include "locknload.h"
+#include "locknload.h"
 
 #define ERASEFROMBOARD block_wprintw(board,XSCALE*x,YSCALE*y,&lst,0)
 #define WRITETOBOARD block_wprintw(board,XSCALE*x,YSCALE*y,&lst,1)
@@ -31,6 +31,7 @@
 #define Z_BLOCK 7
 
 block lst, q_lst;
+rankList ranks;
 int arr[20][10] = {0};
 int x = 0, y = 0, level, queue, score, lineCount = 0;
 int blockCount[7];
@@ -40,7 +41,7 @@ void menuloop(int selection) {
 	canvas(selection + 2, COLOR_BLUE - selection*2);
 	refresh();
 	
-	int levelSelection = 0, 
+	int levelSelection = 1, 
 		noiseSelection = 0, 
 		cX = 22, 
 		cY = 18, 
@@ -102,10 +103,26 @@ void menuloop(int selection) {
 }
 
 void titleloop() {
+	level = 0;
+	queue = 0;
+	score = 0;
+	lineCount = 0;
+	for(int i = 0; i < 20; i++) {
+		for(int j = 0; j < 10; j++) {
+			arr[i][j] = 0;
+		}	
+	}
+	
+	for(int j = 0; j < 7; j++) {
+		blockCount[j] = 0;
+	}
+	
 	canvas(1,COLOR_WHITE);
 	
+	mvprintw(30,101, "=+ High Scores +========");
+	
 	// Not included in title screen file.
-	mvprintw(1,101, "Controls  --------------");
+	mvprintw(1,101, "=+ Controls +===========");
 	mvprintw(3,101, "[W]         Rotate Block");
 	mvprintw(4,101, "[A]  Move Block Leftward");
 	mvprintw(5,101, "[S] Move Block Rightward");
@@ -264,6 +281,14 @@ int clearLine(int y) {
 		}
 	}
 	
+	lineCount++;
+	
+	if (lineCount % 15 == 0) {
+		level++;
+		levelUp();
+		printStatUpdate(1, level);
+	}
+	
 	eraseBoard();
 	directDraw(10, 1);
 }
@@ -343,7 +368,7 @@ void sighandler(int signum) {
 		layeredRefresh(1);
 		
 		if (blockOutCheck(&lst)) 
-			blockOut();
+			blockOut(&ranks, score);
 		else
 			ualarm(LEVELTIME, 0);
 	}
@@ -369,11 +394,11 @@ void gameloop(int level_start, int noise, int selection) {
 	
 	// Only generate noise if level type is type B
 	if (selection) {
+		directDraw(noise, 0);
 		for (int i = 19; i >= 0; i--)
 			if (checkLine(i)) 
 				clearLine(i);
 	}
-	directDraw(noise, 0);
 		
 	// Starting position
 	// Coordinates work as follows: x or y = (board array pos)*(scale)
@@ -457,6 +482,7 @@ void main() {
 	initscr();
 	rembrandtInit();
 	block_init(&lst);
+	curs_set(0);
 	
 	// Seed random numbers based off of system time. True randomness! It'll never seed the same value twice.
 	time_t t;	

@@ -7,7 +7,7 @@
 
 void main() {
 	rankList r;
-	//rankList_init(&r);
+	rankList_init(&r);
 	
 	/*p_rank x;
 	
@@ -41,4 +41,6 @@ void main() {
 	loadScoreData(&r);
 	
 	rankList_print(&r);
+	
+	saveScoreData(&r);
 }

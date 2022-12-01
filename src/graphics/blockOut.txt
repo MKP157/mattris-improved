@@ -27,8 +27,8 @@
 	
 	+----------------------------------------------------------------------+
 	|								       |
-	|		Enter your name below to save this score:	       |
+	|	      Your highscore of 0000000000 has been saved.             |
 	|								       |
-	|	      _ _ _ _ _ _ _ _ , with a score of 0000000000	       |
+	|	            See if it's on the score board!                    |
 	|								       |
 	+======================================================================+

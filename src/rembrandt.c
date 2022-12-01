@@ -4,6 +4,7 @@
 #include <curses.h>
 
 // Custom includes:
+#include "scorestruct.h"
 #include "blockstruct.h"
 #include "locknload.h"
 
@@ -260,13 +261,33 @@ void printStatUpdate(int choice, int value) {
 	layeredRefresh(1);
 }
 
+void rankList_printw(p_rankList plst) {
+	if (plst->head != NULL) {
+		p_rank z = plst->head;
+		rank_printw(z);
+	}
+	
+	else printf("Your ranklist is empty or doesn't exist!");
+}
+
+void rank_printw(p_rank z) {
+	if (z->greater != NULL)
+		rank_printw(z->greater);
+	
+	//printf("%c%c%c's score: %010d \n", z->n1, z->n2, z->n3, z->score);
+	printf("%010d",z->score);
+		
+	if (z->lesser != NULL)
+		rank_printw(z->lesser);
+}
 
 // Block Out ----------------------------------------------------------------------------
 
-void blockOut() {
+void blockOut(p_rankList plst, int s) {
 	wclear(stats);
 	wclear(next);
 	directDraw(10, 3);
+	
 	wrefresh(frame);
 	wrefresh(board);
 	
@@ -284,11 +305,28 @@ void blockOut() {
 	
 	usleep(1000000/50);
 	canvas(6, 0);
+	mvprintw(29,40,"%010d", s);
 	overlay(frame, stdscr);
 	refresh();
 	wrefresh(frame);
 	wrefresh(board);
-	sleep(10);
+	
+	/*
+	char initial[3], ch;
+	
+	for (int i = 0; i < 3; i++) {
+		ch = getchar();
+		initial[i] = ch;
+		mvprintw(33,27 + i*2, "%c", initial[i]);
+	}
+	
+	p_rank x = rankList_newRank(initial[0],initial[1],initial[2],s);
+	rankList_insert(plst, x);*/
+	
+	sleep(6);
+	clear(); move(0,0);
+	//p_rank x = rankList_newRank(s);
+	//rankList_insert(plst, x);
 	titleloop();
 }
 // --------------------------------------------------------------------------------------
