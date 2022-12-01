@@ -42,5 +42,5 @@ void main() {
 	
 	rankList_print(&r);
 	
-	saveScoreData(&r);
+	//saveScoreData(&r);
 }

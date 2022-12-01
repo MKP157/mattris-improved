@@ -61,7 +61,7 @@ void rank_sort(p_rank zN, p_rank zC) {
 		rank_sort(zN, zC->lesser);
 }
 
-/*void rankList_print(p_rankList plst) {
+void rankList_print(p_rankList plst) {
 	if (plst->head != NULL) {
 		p_rank z = plst->head;
 		rank_print(z);
@@ -75,14 +75,14 @@ void rank_print(p_rank z) {
 	if (z->greater != NULL)
 		rank_print(z->greater);
 	
-	//printf("%c%c%c's score: %010d \n", z->n1, z->n2, z->n3, z->score);
-	getchar();
-	printw("%c%c%c's score: %010d", z->n1, z->n2, z->n3, z->score);
-	getchar();
+	printf("score: %010d \n", z->score);
+	//getchar();
+	//printw("%c%c%c's score: %010d", z->n1, z->n2, z->n3, z->score);
+	//getchar();
 	
 	if (z->lesser != NULL)
 		rank_print(z->lesser);
-}*/
+}
 
 void rankList_delete(p_rankList plst) {
 	if (plst->head == NULL) {
@@ -105,7 +105,76 @@ void rank_delete(p_rank z) {
 	rank_delete(z->greater);
 		
 	free(z);
+}
 
+
+void loadScoreData(p_rankList plst) {
+	FILE *loadScore;
+	
+	int temp;
+	//char n1,n2,n3;
+	int len;
+	
+	loadScore = fopen("./bindata/scoredata_debug.txt", "r");
+	
+	if (loadScore == NULL) {
+		printf("Bad score files!");
+		exit(1);
+	}
+	
+	p_rank x;
+	for (int i = 0; i < 10; i++) {
+		//fscanf(loadScore, "%c", &n1);
+		//fscanf(loadScore, "%c", &n2);
+		//fscanf(loadScore, "%c", &n3);
+		
+   		fscanf(loadScore, "%d", &temp);
+   		
+   		//x = rankList_newRank(n1,n2,n3,temp)
+     		x = rankList_newRank(temp);
+		rankList_insert(plst, x);
+		
+		// garbage collection, don't touch
+	}
+	
+	fclose(loadScore);
+}
+
+void saveScoreData(p_rankList plst) {
+	FILE *saveScore;
+	
+	int temp;
+	char n1,n2,n3;
+	int len;
+	
+	saveScore = fopen("./bindata/scoredata_debug.txt", "w");
+	
+	if (saveScore == NULL) {
+		printf("Bad score files!");
+		exit(1);
+	}
+	
+	rankList_fprint(plst, saveScore);
+	fclose(saveScore);
+	rankList_delete(plst);
+}
+
+void rankList_fprint(p_rankList plst, FILE *out) {
+	if (plst->head != NULL) {
+		p_rank z = plst->head;
+		rank_fprint(z, out);
+	}
+}
+
+void rank_fprint(p_rank z, FILE *out) {
+	if (z->greater != NULL)
+		rank_fprint(z->greater, out);
+	
+	//fprintf(out, "%c%c%c %010d\n", z->n1, z->n2, z->n3, z->score);
+	fprintf(out, "%010d\n", z->score);
+	
+	if (z->lesser != NULL)
+		rank_fprint(z->lesser, out);
 }
 
 // ------------------------------------------------------

@@ -41,7 +41,7 @@ void menuloop(int selection) {
 	canvas(selection + 2, COLOR_BLUE - selection*2);
 	refresh();
 	
-	int levelSelection = 1, 
+	int levelSelection = 0, 
 		noiseSelection = 0, 
 		cX = 22, 
 		cY = 18, 
@@ -380,6 +380,7 @@ void gameloop(int level_start, int noise, int selection) {
 	gameWindowInit();
 	x = 0, y = 0;
 	level = level_start;
+	lineCount = 0;
 	
 	if (level_start > 1)
 		score += level_start * 1000;
@@ -473,6 +474,7 @@ void gameloop(int level_start, int noise, int selection) {
 		layeredRefresh(3);
 		ch = getchar();
 	}
+	
 	
 	titleloop();
 }
