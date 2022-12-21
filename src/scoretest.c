@@ -39,5 +39,7 @@ void main() {
 	
 	printf("\n\n");
 	scoreList_print(&x);
-	saveScoreData(&r);
+	saveScoreData(&x);
+	scoreList_delete(&x);
+	scoreList_print(&x);
 }

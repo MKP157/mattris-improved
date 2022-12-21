@@ -9,6 +9,28 @@
 #include "gameloop.c"
 
 #define CLEARREF clear();refresh()
+scoreList slst;	
+
+int main_smallestScore() { return scoreList_smallest(&slst); }
+
+void addScore(int *s) {
+	char initials[4];
+	for (int i = 0; i < 4;) {
+		char ch = getchar();
+		move(32, 39 + i*3);
+		if (ch >= 'A' && ch <= 'Z') {
+			initials[i++] = ch;
+			printw("%c", ch);
+		}
+		refresh();
+	} 
+	initials[4] = 0;
+	
+	p_score x = scoreList_newScore(initials, *s);
+	scoreList_insert(&slst, x);
+	//scoreList_print(&slst);
+	saveScoreData(&slst);
+}
 
 int menuloop(int selection) {
 	canvas(selection + 2, COLOR_BLUE - selection*2);
@@ -56,10 +78,10 @@ int menuloop(int selection) {
 		} 
 		
 		// For debugging:
-		mvprintw(0,0,"%d",levelSelection);
-		mvprintw(1,0,"%d",noiseSelection);
-		mvprintw(2,0,"%d",menuType);
-		mvprintw(3,0,"%d",selection);
+		//mvprintw(0,0,"%d",levelSelection);
+		//mvprintw(1,0,"%d",noiseSelection);
+		//mvprintw(2,0,"%d",menuType);
+		//mvprintw(3,0,"%d",selection);
 		
 		refresh();
 		
@@ -76,18 +98,7 @@ int menuloop(int selection) {
 
 int titleloop() {
 	canvas(1,COLOR_WHITE);
-	
-	mvprintw(30,101, "=+ High Scores +========");
-	
-	// Not included in title screen file.
-	mvprintw(1,101, "=+ Controls +===========");
-	mvprintw(3,101, "[W]         Rotate Block");
-	mvprintw(4,101, "[A]  Move Block Leftward");
-	mvprintw(5,101, "[S] Move Block Rightward");
-	mvprintw(6,101, "[D]  Move Block Downward");
-	mvprintw(8,101, "[Enter]            Pause");
-	mvprintw(9,101, "[X]            Quit Game");
-	
+	scoreList_wprint(&slst,21,101);
 	refresh();
 	
 	int selection = 0;
@@ -136,12 +147,15 @@ void main() {
 	srand((unsigned) time(&t));
 	// -------------------------------------------
 	
+	scoreList_init(&slst);
+	loadScoreData(&slst);
 	//////////////////// to be put in menu-nav method
 	int quit = 0;
 	do {
 		quit = titleloop();
 	} while (!quit);
 	////////////////////////
+	scoreList_delete(&slst);
 	curs_set(1);
 	endwin();
 }

@@ -22,7 +22,7 @@
 
 block lst, q_lst;
 int arr[20][10] = {0};
-int x = 0, y = 0, level, queue, score, lineCount = 0;
+int x = 0, y = 0, level, queue, scoreInstance, lineCount = 0;
 int blockCount[7];
 int end = 0;
 
@@ -129,7 +129,7 @@ int checkLine(int y){
 	}
 	
 	lineCount++;
-	score += 100;
+	scoreInstance += 100;
 	// If all positions are over 1, the line will clear.
 	return y;
 }
@@ -228,14 +228,14 @@ void sighandler(int signum) {
 		layeredRefresh(1);
 		
 		if (blockOutCheck(&lst)) {
-			blockOut(score);
+			blockOut(scoreInstance);
 			end = 1;
 		}
 		else
 			ualarm(LEVELTIME, 0);
 	}
 	
-	printStatUpdate(0,score);
+	printStatUpdate(0,scoreInstance);
 }
 
 int gameloop(int* level_start, int* noise, int* selection) {
@@ -251,7 +251,7 @@ int gameloop(int* level_start, int* noise, int* selection) {
 	lineCount = 0;
 	
 	if (*level_start > 1)
-		score += *level_start * 1000;
+		scoreInstance += *level_start * 1000;
 		
 	canvas(4 + *selection,COLOR_BLUE - (*selection*2));
 	eraseBoard();
@@ -274,7 +274,7 @@ int gameloop(int* level_start, int* noise, int* selection) {
 	signal(SIGALRM,sighandler); // Register signal handler
 	ualarm(LEVELTIME, 0);
 	
-	printStatUpdate(0,score);
+	printStatUpdate(0,scoreInstance);
 	printStatUpdate(1,level);
 	
 	char ch = 'e';
@@ -297,7 +297,7 @@ int gameloop(int* level_start, int* noise, int* selection) {
 		break;
 		
 		case 's':
-			score += 10;
+			scoreInstance += 10;
 			sighandler(SIGALRM);	// Trigger the alarm before it's supposed to sound
 		break;
 		

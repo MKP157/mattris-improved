@@ -169,6 +169,7 @@ int canvas(int x, int colour) {
 	FILE *load;
 	char line[MAXLEN];
 	
+	// Load graphics files: -----------------------------------------
 	switch (x) {
 	// Title Screen
 		case 1: load = fopen("./graphics/title.txt", "r"); break;
@@ -198,6 +199,26 @@ int canvas(int x, int colour) {
 	
 	move(0,0);
 	fclose(load);
+	
+	// Load extras : ------------------------------------------------
+	switch (x) {
+	// Title Screen
+		case 1:
+			mvprintw(20,101, "=+ High Scores +========");
+			
+			// Not included in title screen file.
+			mvprintw(1,101, "=+ Controls +===========");
+			mvprintw(3,101, "[W]         Rotate Block");
+			mvprintw(4,101, "[A]  Move Block Leftward");
+			mvprintw(5,101, "[S] Move Block Rightward");
+			mvprintw(6,101, "[D]  Move Block Downward");
+			mvprintw(8,101, "[Enter]            Pause");
+			mvprintw(9,101, "[X]            Quit Game");
+		break;
+		
+		default: break;
+	}
+	
      	refresh();
 	attroff(COLOR_PAIR(colour));
 	return 1;
@@ -279,26 +300,6 @@ void printStatUpdate(int choice, int value) {
 	layeredRefresh(1);
 }
 
-void rankList_printw(p_rankList plst) {
-	if (plst->head != NULL) {
-		p_rank z = plst->head;
-		rank_printw(z);
-	}
-	
-	else printf("Your ranklist is empty or doesn't exist!");
-}
-
-void rank_printw(p_rank z) {
-	if (z->greater != NULL)
-		rank_printw(z->greater);
-	
-	//printf("%c%c%c's score: %010d \n", z->n1, z->n2, z->n3, z->score);
-	printf("%010d",z->score);
-		
-	if (z->lesser != NULL)
-		rank_printw(z->lesser);
-}
-
 // Block Out ----------------------------------------------------------------------------
 
 void blockOut(int s) {
@@ -323,28 +324,28 @@ void blockOut(int s) {
 	
 	usleep(1000000/50);
 	canvas(6, 0);
-	mvprintw(29,40,"%010d", s);
+	
 	overlay(frame, stdscr);
 	refresh();
 	wrefresh(frame);
 	wrefresh(board);
 	
-	/*
-	char initial[3], ch;
-	
-	for (int i = 0; i < 3; i++) {
-		ch = getchar();
-		initial[i] = ch;
-		mvprintw(33,27 + i*2, "%c", initial[i]);
+	mvprintw(29, 24, "Your final score was %010d points.", s);
+	if (s > main_smallestScore()) {
+		mvprintw(30, 24, "Congratulations! That's a leaderboard score!");
+		mvprintw(31, 24, "Enter 4 capitalized initials to save your score:");
+		mvprintw(32, 39, "_  _  _  _");
+		refresh();
+		addScore(&s);
+	}
+	else {
+		mvprintw(30, 17, "Looks like that score wasn't enough to make the leaderboard.");
+		mvprintw(31, 24, "Better luck next time!");
+		sleep(5);
 	}
 	
-	p_rank x = rankList_newRank(initial[0],initial[1],initial[2],s);
-	rankList_insert(plst, x);*/
-	
-	sleep(5);
+	sleep(7);
 	clear(); move(0,0);
-	//p_rank x = rankList_newRank(s);
-	//rankList_insert(plst, x);
 }
 // --------------------------------------------------------------------------------------
 
