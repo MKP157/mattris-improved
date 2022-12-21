@@ -151,9 +151,9 @@ void main() {
 	loadScoreData(&slst);
 	//////////////////// to be put in menu-nav method
 	int quit = 0;
-	do {
+	while (!quit) {
 		quit = titleloop();
-	} while (!quit);
+	}
 	////////////////////////
 	scoreList_delete(&slst);
 	curs_set(1);

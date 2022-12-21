@@ -327,14 +327,14 @@ int gameloop(int* level_start, int* noise, int* selection) {
 		break;
 		}
 		
-		for (int i = 0; i < 20; i++) {
-			for (int j = 0; j < 10; j++) {
-				mvprintw(i,j+100,"%d",arr[i][j]);
-			}
-		}
+		//for (int i = 0; i < 20; i++) {
+		//	for (int j = 0; j < 10; j++) {
+		//		mvprintw(i,j+100,"%d",arr[i][j]);
+		//	}
+		//}
 		
-		mvprintw(50,100,"y = %d",y);
-		mvprintw(51,100,"x = %d",x);
+		//mvprintw(50,100,"y = %d",y);
+		//mvprintw(51,100,"x = %d",x);
 		
 		layeredRefresh(3);
 		ch = getchar();

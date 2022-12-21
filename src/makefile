@@ -1,25 +1,13 @@
-IDIR =../include
-CC=gcc
-CFLAGS=-I$(IDIR)
+# MATTRIS by Matthew Kenneth Peterson
+#
+# In order to execute this "Makefile" just type "make"
 
-ODIR=obj
-
-LIBS=-lm -lncurses
-
-_DEPS = locknload.h scorestruct.h blockstruct.h
-DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
-
-_OBJ = hellomake.o hellofunc.o 
-OBJ = $(patsubst %,$(ODIR)/%,$(_OBJ))
+SOURCE	= main.c rembrandt.c gameloop.c
+HEADER	= blockstruct.h scorestruct.h locknload.h
+OUT	= mattris.out
+CC	= gcc
+LFLAGS	= -lm -lncurses
 
 
-$(ODIR)/%.c: %.c $(DEPS)
-	$(CC) -c -o $@ $< $(CFLAGS)
-
-mattris: $(OBJ)
-	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
-
-.PHONY: clean
-
-clean:
-	rm -f $(ODIR)/*.o *~ core $(INCDIR)/*~
+make: $(OBJS)
+	$(CC) -g main.c -o $(OUT) $(LFLAGS)

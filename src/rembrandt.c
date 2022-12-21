@@ -337,14 +337,18 @@ void blockOut(int s) {
 		mvprintw(32, 39, "_  _  _  _");
 		refresh();
 		addScore(&s);
+		mvprintw(33, 24, "Press any key to exit...");
+		refresh();
+		getchar();
 	}
 	else {
 		mvprintw(30, 17, "Looks like that score wasn't enough to make the leaderboard.");
 		mvprintw(31, 24, "Better luck next time!");
-		sleep(5);
+		mvprintw(32, 24, "Press any key to exit...");
+		refresh();
+		getchar();
 	}
 	
-	sleep(7);
 	clear(); move(0,0);
 }
 // --------------------------------------------------------------------------------------
