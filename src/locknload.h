@@ -10,6 +10,7 @@
 
 // Length of block data: <blocktype,y,x,y,x,y,x,y,x> = 8 integers
 #define B_DATALEN 10
+#define S_DATALEN 19
 #define SC_NAME_DATALEN 10
 #define SC_VALU_DATALEN 11
 #define OUTFILE_DATALEN 10
@@ -53,7 +54,46 @@ void pullBlock(p_block plst) {
 	}
 }
 
+void loadScoreData(p_scoreList plst) {
+	FILE *load;
+	char line[S_DATALEN];
+	int temp;
+	
+	load = fopen("./bindata/scoredata.txt", "r");
+	
+	if (load == NULL) {
+		printf("Bad score file!");
+		exit(1);
+	}
+	
+	p_score A;
+	
+	while (fgets(line, S_DATALEN, load)) {	
+		char temp[4] = {line[0], line[1], line[2], line[3]};
+		char* temp2 = line + 7;
+		int s = atoi(temp2);
+		
+		A = scoreList_newScore(temp, s);
+		scoreList_insert(plst, A);
+	}
+	
+	fclose(load);
+}
 
+void saveScoreData(p_scoreList plst) {
+	FILE *save;
+	
+	save = fopen("./bindata/scoredata.txt", "w");
+	
+	if (save == NULL) {
+		printf("Bad score file!");
+		exit(1);
+	}
+	
+	scoreList_fprint(plst,save);
+	
+	fclose(save);
+}
 
 #endif
 

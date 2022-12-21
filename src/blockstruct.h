@@ -54,23 +54,30 @@ void block_insert(p_block plst, p_chunk z) {
 	plst->head = z;
 }
 
-p_chunk block_delete(p_block plst, p_chunk z) {
-	if (z->prev != NULL) {
-		z->prev->next = z->next;
-	}
-	else {
+void chunk_delete(p_block plst, p_chunk z) {
+	// Base scenario
+	if (plst->head == NULL || z == NULL) return;
+	
+	// Delete head block
+	if (plst->head == z)
 		plst->head = z->next;
-	}
-	if (z->next != NULL) {
+		
+	/* The rest of these are for proper doubly-linked list implementations. No need.
+	if (z->next != NULL)
 		z->next->prev = z->prev;
-	}
+		
+	if (z->prev != NULL)
+		z->prev->next = z->next;
+	*/
+	// Free chunk
 	free(z);
+	return;
 }
 
 void block_destroy(p_block plst) {
 	p_chunk z = plst->head;
 	while(z) {
-		block_delete(plst, z);
+		chunk_delete(plst, z);
 		z = z->next;
 	}
 }

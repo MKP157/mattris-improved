@@ -119,6 +119,24 @@ void gameWindowInit(){
 // --------------------------------------------------------------------------------------
 
 
+// Exit main game windows ----------------------------------------------------------------
+void destroy_win(WINDOW *local_win)
+{	
+	wclear(local_win);
+	wrefresh(local_win);
+	delwin(local_win);
+}
+
+void gameWindowExit(){
+	destroy_win(stats);
+	destroy_win(next);
+	destroy_win(frame);
+	destroy_win(board);
+	clear();
+}
+// --------------------------------------------------------------------------------------
+
+
 // Refresh only the necessary windows in the stack --------------------------------------
 
 void layeredRefresh(int layers) {
@@ -283,7 +301,7 @@ void rank_printw(p_rank z) {
 
 // Block Out ----------------------------------------------------------------------------
 
-void blockOut(p_rankList plst, int s) {
+void blockOut(int s) {
 	wclear(stats);
 	wclear(next);
 	directDraw(10, 3);
@@ -323,11 +341,10 @@ void blockOut(p_rankList plst, int s) {
 	p_rank x = rankList_newRank(initial[0],initial[1],initial[2],s);
 	rankList_insert(plst, x);*/
 	
-	sleep(6);
+	sleep(5);
 	clear(); move(0,0);
 	//p_rank x = rankList_newRank(s);
 	//rankList_insert(plst, x);
-	titleloop();
 }
 // --------------------------------------------------------------------------------------
 

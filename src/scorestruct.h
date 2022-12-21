@@ -1,183 +1,92 @@
 #include <stdlib.h>
-#include <curses.h>
 
 // Include guards
 #pragma once
-#ifndef SCORESTRUCT_H
-#define SCORESTRUCT_H
+#ifndef scoreListSTRUCT_H
+#define scoreListSTRUCT_H
 
 // Definitions ------------------------------------------
-typedef struct __rank{
-	//char n1,n2,n3;
-	int score;
+typedef struct __score{
+	int s;
+	char name[4];
 	
-	struct __rank *greater;
-	struct __rank *lesser;
-} rank;
+	struct __score *greater;
+	struct __score *lesser;
+} score;
 
-typedef rank* p_rank;
+typedef score* p_score;
 
 typedef struct {
-	p_rank head;
-} rankList;
+	p_score head;
+} scoreList;
 
-typedef rankList* p_rankList;
+typedef scoreList* p_scoreList;
 
 // ------------------------------------------------------
 
 // Functions --------------------------------------------
 
-p_rank rankList_newRank(int in_score) {
-	p_rank z = (p_rank)malloc(sizeof(rank));
+// Create a new scoreList
+p_score scoreList_newScore(char n[], int key) {
+	p_score z = (p_score)malloc(sizeof(score));
+	z->s = key;
+	int i = 0;
+	for (; n[i] && i < 4; i++)
+		z->name[i] = n[i];
+	z->name[4] = '\0';
 	
-	z->score = in_score;
 	return z;
 }
 
-void rankList_init(p_rankList plst) { plst->head = NULL; }
+void scoreList_init(p_scoreList plst) { plst->head = NULL; }
 
-void rankList_insert(p_rankList plst, p_rank z) {
-	if( plst->head != NULL )
-		rank_sort(z, plst->head);
-	else
-		plst->head = z;
-}
-
-void rank_sort(p_rank zN, p_rank zC) {
-	if (zN->score >= zC->score && ((zC->greater == NULL) || (zC->greater->score > zN->score))) {
-		zN->greater = zC->greater;
-		zC->greater = zN;
-	}
-		
-	else if  ((zN->score >= zC->score) && (zC->greater->score < zN->score))
-		rank_sort(zN, zC->greater);
-		
-	else if (zN->score < zC->score && ((zC->lesser == NULL) || (zC->lesser->score < zN->score))) {
-		zN->lesser = zC->lesser;
-		zC->lesser = zN;
-	}
-	
-	else
-		rank_sort(zN, zC->lesser);
-}
-
-void rankList_print(p_rankList plst) {
-	if (plst->head != NULL) {
-		p_rank z = plst->head;
-		rank_print(z);
-	}
-	
-	else printf("Your ranklist is empty or doesn't exist!");
-}
-
-
-void rank_print(p_rank z) {
-	if (z->greater != NULL)
-		rank_print(z->greater);
-	
-	printf("score: %010d \n", z->score);
-	//getchar();
-	//printw("%c%c%c's score: %010d", z->n1, z->n2, z->n3, z->score);
-	//getchar();
-	
-	if (z->lesser != NULL)
-		rank_print(z->lesser);
-}
-
-void rankList_delete(p_rankList plst) {
-	if (plst->head == NULL) {
-		rankList_init(plst);
-		printf("Your ranklist is empty or doesn't exist!");
-		return;
+void scoreComp(p_score x, p_score z) {
+	if (x->s >= z->s) {
+		if (x->lesser != NULL)
+			scoreComp(x->lesser, z);
+		else
+			x->lesser = z;
 	}
 	else {
-		p_rank z = plst->head;
-		rank_delete(z);
-		return;
+		if (x->greater != NULL)
+			scoreComp(x->greater, z);
+		else
+			x->greater = z;
 	}
 }
 
-
-void rank_delete(p_rank z) {
-	if (z == NULL) return;
-	
-	rank_delete(z->lesser);
-	rank_delete(z->greater);
-		
-	free(z);
+void scoreList_insert(p_scoreList plst, p_score z) {
+	if (plst->head == NULL) plst->head = z;
+	else {
+		p_score x = plst->head;
+		scoreComp(x, z);
+	}
 }
 
-
-void loadScoreData(p_rankList plst) {
-	FILE *loadScore;
-	
-	int temp;
-	//char n1,n2,n3;
-	int len;
-	
-	loadScore = fopen("./bindata/scoredata_debug.txt", "r");
-	
-	if (loadScore == NULL) {
-		printf("Bad score files!");
-		exit(1);
-	}
-	
-	p_rank x;
-	for (int i = 0; i < 10; i++) {
-		//fscanf(loadScore, "%c", &n1);
-		//fscanf(loadScore, "%c", &n2);
-		//fscanf(loadScore, "%c", &n3);
-		
-   		fscanf(loadScore, "%d", &temp);
-   		
-   		//x = rankList_newRank(n1,n2,n3,temp)
-     		x = rankList_newRank(temp);
-		rankList_insert(plst, x);
-		
-		// garbage collection, don't touch
-	}
-	
-	fclose(loadScore);
-}
-
-void saveScoreData(p_rankList plst) {
-	FILE *saveScore;
-	
-	int temp;
-	char n1,n2,n3;
-	int len;
-	
-	saveScore = fopen("./bindata/scoredata_debug.txt", "w");
-	
-	if (saveScore == NULL) {
-		printf("Bad score files!");
-		exit(1);
-	}
-	
-	rankList_fprint(plst, saveScore);
-	fclose(saveScore);
-	rankList_delete(plst);
-}
-
-void rankList_fprint(p_rankList plst, FILE *out) {
+void scoreList_print(p_scoreList plst) {
 	if (plst->head != NULL) {
-		p_rank z = plst->head;
-		rank_fprint(z, out);
+		p_score z = plst->head;
+		scoreList_printTraverse(z);
 	}
 }
 
-void rank_fprint(p_rank z, FILE *out) {
-	if (z->greater != NULL)
-		rank_fprint(z->greater, out);
-	
-	//fprintf(out, "%c%c%c %010d\n", z->n1, z->n2, z->n3, z->score);
-	fprintf(out, "%010d\n", z->score);
-	
-	if (z->lesser != NULL)
-		rank_fprint(z->lesser, out);
+void scoreList_printTraverse(p_score z) {
+	if (z->lesser != NULL) scoreList_printTraverse(z->lesser);
+	printf("%.4s : %010d\n", z->name, z->s);
+	if (z->greater != NULL) scoreList_printTraverse(z->greater);
 }
 
-// ------------------------------------------------------
+void scoreList_fprint(p_scoreList plst, FILE *save) {
+	if (plst->head != NULL) {
+		p_score z = plst->head;
+		scoreList_fprintTraverse(z, save);
+	}
+}
 
+void scoreList_fprintTraverse(p_score z, FILE *save) {
+	if (z->lesser != NULL) scoreList_fprintTraverse(z->lesser, save);
+	fprintf(save, "%.4s : %010d\n", z->name, z->s);
+	if (z->greater != NULL) scoreList_fprintTraverse(z->greater, save);
+}
 #endif
 

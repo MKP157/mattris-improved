@@ -1,46 +1,43 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "./locknload.h"
 #include "./scorestruct.h"
-
+#include "./locknload.h"
 
 void main() {
-	rankList r;
-	rankList_init(&r);
+	scoreList r;
+	scoreList_init(&r);
 	
-	/*p_rank x;
+	p_score A;
+	A = scoreList_newScore("ADRI", 4);
+	scoreList_insert(&r, A);
+	A = scoreList_newScore("AIDE", 1);
+	scoreList_insert(&r, A);
+	A = scoreList_newScore("JOSH", 6);
+	scoreList_insert(&r, A);
+	A = scoreList_newScore("JOSH", 6);
+	scoreList_insert(&r, A);
+	A = scoreList_newScore("JOSH", 6);
+	scoreList_insert(&r, A);
+	A = scoreList_newScore("nil ", -1);
+	scoreList_insert(&r, A);
 	
-	x = rankList_newRank("MATTKP  ", 8);
-	rankList_insert(&r, x);
+	//scoreList_print((&r)->head);
 	
-	x = rankList_newRank("ADRIANFR", 4);
-	rankList_insert(&r, x);
-	
-	x = rankList_newRank("AIDENMAN", 1);
-	rankList_insert(&r, x);
-	
-	x = rankList_newRank("JOSHBACO", 6);
-	rankList_insert(&r, x);
-	
-	printf("\n\n");
-	rankList_print(&r);
-	
-	x = rankList_newRank("ANSONGRE", 11);
-	rankList_insert(&r, x);
-	
-	x = rankList_newRank("ELONMUH ", 9);
-	rankList_insert(&r, x);
+	A = scoreList_newScore("ANSO", 11);
+	scoreList_insert(&r, A);
+	A = scoreList_newScore("ELON", 9);
+	scoreList_insert(&r, A);
 	
 	printf("\n\n");
-	rankList_print(&r);
+	scoreList_print(&r);
+	
+	
+	scoreList x;
+	scoreList_init(&x);
+	loadScoreData(&x);
 	
 	printf("\n\n");
-	rankList_delete(&r);*/
-	
-	loadScoreData(&r);
-	
-	rankList_print(&r);
-	
-	//saveScoreData(&r);
+	scoreList_print(&x);
+	saveScoreData(&r);
 }
